@@ -1,0 +1,104 @@
+{% extends 'crm/base.html' %}
+
+{% block title %}Повернення коштів - Платіж #{{ payment.id }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-warning">
+                    <h4><i class="fas fa-undo me-2"></i>Повернення коштів</h4>
+                    <p class="mb-0">Платіж #{{ payment.id }} - Замовлення #{{ payment.order.id }}</p>
+                </div>
+                <div class="card-body">
+                    <!-- Попередження -->
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Увага!</strong> Ця дія поверне кошти клієнту і змінить статус платежу на "Повернено". 
+                        Цю операцію неможливо скасувати.
+                    </div>
+
+                    <!-- Інформація про платіж -->
+                    <div class="border rounded p-3 bg-light mb-4">
+                        <h6>Інформація про платіж:</h6>
+                        <div class="row">
+                            <div class="col-6">
+                                <ul class="list-unstyled mb-0">
+                                    <li><strong>ID платежу:</strong> #{{ payment.id }}</li>
+                                    <li><strong>Сума:</strong> {{ payment.amount }} грн</li>
+                                    <li><strong>Спосіб оплати:</strong> {{ payment.get_method_display }}</li>
+                                    <li><strong>Статус:</strong> 
+                                        <span class="badge bg-success">{{ payment.get_status_display }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-6">
+                                <ul class="list-unstyled mb-0">
+                                    <li><strong>Клієнт:</strong> {{ payment.order.client.name }}</li>
+                                    <li><strong>Товар:</strong> {{ payment.order.product }}</li>
+                                    <li><strong>Дата платежу:</strong> {{ payment.processed_at|date:"d.m.Y H:i" }}</li>
+                                    <li><strong>Оброблено:</strong> {{ payment.processed_by.username }}</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Додаткова інформація для готівкових платежів -->
+                    {% if payment.is_cash_payment and payment.change_amount %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Готівковий платіж:</strong><br>
+                        Отримано: {{ payment.cash_received }} грн<br>
+                        Здача: {{ payment.change_amount }} грн<br>
+                        <small>До повернення клієнту: {{ payment.amount }} грн</small>
+                    </div>
+                    {% endif %}
+
+                    <!-- Форма повернення -->
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="refund_reason" class="form-label">
+                                <strong>Причина повернення *</strong>
+                            </label>
+                            <textarea name="refund_reason" id="refund_reason" 
+                                      class="form-control" rows="3" required
+                                      placeholder="Вкажіть причину повернення коштів..."></textarea>
+                        </div>
+
+                        <div class="alert alert-light border">
+                            <h6><i class="fas fa-clipboard-list me-2"></i>Що відбудеться після підтвердження:</h6>
+                            <ul class="mb-0">
+                                <li>Статус платежу зміниться на "Повернено"</li>
+                                <li>Причина повернення буде додана до примітки платежу</li>
+                                <li>Операція буде зафіксована в системі</li>
+                                {% if payment.is_cash_payment %}
+                                <li class="text-warning">
+                                    <strong>Готівкове повернення:</strong> Поверніть {{ payment.amount }} грн клієнту
+                                </li>
+                                {% else %}
+                                <li class="text-info">
+                                    <strong>Безготівкове повернення:</strong> Зверніться до служби підтримки банку для повернення коштів
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'payment_detail' payment.id %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> Назад
+                            </a>
+                            <button type="submit" class="btn btn-warning" 
+                                    onclick="return confirm('Ви впевнені, що хочете повернути кошти? Цю дію неможливо скасувати.')">
+                                <i class="fas fa-undo"></i> Підтвердити повернення
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

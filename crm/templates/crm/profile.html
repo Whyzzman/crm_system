@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Профіль користувача{% endblock %}
+
+{% block content %}
+<div class="container d-flex justify-content-center mt-5">
+    <div class="card shadow" style="width: 400px;">
+        <div class="card-header bg-primary text-white">
+            <h5 class="card-title mb-0">Профіль користувача</h5>
+        </div>
+        <div class="card-body">
+            <p><strong>Ім’я користувача:</strong> {{ user.username }}</p>
+            <p><strong>Email:</strong> {{ user.email }}</p>
+            <p><strong>Дата реєстрації:</strong> {{ user.date_joined|date:"d.m.Y H:i" }}</p>
+            <p><strong>Статус:</strong> {% if user.is_superuser %}Адмін{% else %}Звичайний користувач{% endif %}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

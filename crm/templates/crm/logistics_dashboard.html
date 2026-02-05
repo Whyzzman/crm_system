@@ -1,0 +1,299 @@
+{% extends 'crm/base.html' %}
+{% load static %}
+
+{% block title %}Панель Логістики{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+/* These styles are now handled by base.css for theme support */
+/* Removed inline styles to prevent theme conflicts */
+
+.action-buttons {
+    margin-bottom: 20px;
+}
+
+.action-buttons .btn {
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+.route-status {
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.route-status.active { background-color: #27ae60; color: white; }
+.route-status.planned { background-color: #f39c12; color: white; }
+.route-status.completed { background-color: #95a5a6; color: white; }
+
+.courier-status {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.courier-status.fresh { background-color: #27ae60; }
+.courier-status.stale { background-color: #e74c3c; }
+
+.priority-badge {
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+
+.priority-badge.urgent { background-color: #e74c3c; color: white; }
+.priority-badge.high { background-color: #f39c12; color: white; }
+.priority-badge.normal { background-color: #3498db; color: white; }
+.priority-badge.low { background-color: #95a5a6; color: white; }
+
+.table-responsive {
+    max-height: 400px;
+    overflow-y: auto;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid logistics-page">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="fas fa-route"></i> Панель Логістики
+            </h1>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-number text-primary">{{ total_active_routes }}</div>
+                <div class="stats-label">Активні Маршрути</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-number text-success">{{ total_active_couriers }}</div>
+                <div class="stats-label">Активні Кур'єри</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-number text-warning">{{ total_pending_orders }}</div>
+                <div class="stats-label">Замовлення в Очікуванні</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-number text-danger">{{ total_overdue_orders }}</div>
+                <div class="stats-label">Прострочені Замовлення</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <a href="{% url 'route_optimization' %}" class="btn btn-primary">
+            <i class="fas fa-route"></i> Створити Маршрут
+        </a>
+        <a href="{% url 'courier_tracking' %}" class="btn btn-info">
+            <i class="fas fa-map-marker-alt"></i> Відстежити Кур'єрів
+        </a>
+        <a href="{% url 'auto_assign_orders' %}" class="btn btn-success">
+            <i class="fas fa-robot"></i> Автопризначення Замовлень
+        </a>
+        <a href="{% url 'create_daily_routes' %}" class="btn btn-warning">
+            <i class="fas fa-calendar-day"></i> Створити Денні Маршрути
+        </a>
+        <a href="{% url 'delivery_analytics' %}" class="btn btn-secondary">
+            <i class="fas fa-chart-bar"></i> Аналітика
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Active Routes -->
+        <div class="col-md-6">
+            <div class="stats-card">
+                <h4><i class="fas fa-route"></i> Активні Маршрути</h4>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Маршрут</th>
+                                <th>Кур'єр</th>
+                                <th>Замовлення</th>
+                                <th>Статус</th>
+                                <th>Дії</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for route in active_routes %}
+                            <tr>
+                                <td>{{ route.name }}</td>
+                                <td>{{ route.courier.name }}</td>
+                                <td>{{ route.order_count }}</td>
+                                <td><span class="route-status {{ route.status }}">{{ route.get_status_display }}</span></td>
+                                <td>
+                                    <a href="{% url 'route_detail' route.id %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">Немає активних маршрутів</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Couriers -->
+        <div class="col-md-6">
+            <div class="stats-card">
+                <h4><i class="fas fa-users"></i> Активні Кур'єри</h4>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Кур'єр</th>
+                                <th>Транспорт</th>
+                                <th>GPS Статус</th>
+                                <th>Останнє Оновлення</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for courier in active_couriers %}
+                            <tr>
+                                <td>
+                                    <span class="courier-status {% if courier.is_location_fresh %}fresh{% else %}stale{% endif %}"></span>
+                                    {{ courier.name }}
+                                </td>
+                                <td>{{ courier.get_vehicle_type_display }}</td>
+                                <td>
+                                    {% if courier.is_location_fresh %}
+                                        <span class="text-success">Свіжий</span>
+                                    {% else %}
+                                        <span class="text-warning">Застарілий</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if courier.last_location_update %}
+                                        {{ courier.last_location_update|timesince }} тому
+                                    {% else %}
+                                        Ніколи
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">Немає активних кур'єрів</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <!-- Pending Orders -->
+        <div class="col-md-6">
+            <div class="stats-card">
+                <h4><i class="fas fa-clock"></i> Замовлення в Очікуванні</h4>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Замовлення №</th>
+                                <th>Клієнт</th>
+                                <th>Пріоритет</th>
+                                <th>Статус</th>
+                                <th>Кур'єр</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in pending_orders %}
+                            <tr>
+                                <td>#{{ order.id }}</td>
+                                <td>{{ order.client.name }}</td>
+                                <td><span class="priority-badge {{ order.priority }}">{{ order.get_priority_display }}</span></td>
+                                <td>{{ order.get_status_display }}</td>
+                                <td>
+                                    {% if order.courier %}
+                                        {{ order.courier.name }}
+                                    {% else %}
+                                        <span class="text-muted">Не призначено</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">Немає замовлень в очікуванні</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overdue Orders -->
+        <div class="col-md-6">
+            <div class="stats-card">
+                <h4><i class="fas fa-exclamation-triangle"></i> Прострочені Замовлення</h4>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Замовлення №</th>
+                                <th>Клієнт</th>
+                                <th>Очікувалось</th>
+                                <th>Кур'єр</th>
+                                <th>Затримка</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in overdue_orders %}
+                            <tr>
+                                <td>#{{ order.id }}</td>
+                                <td>{{ order.client.name }}</td>
+                                <td>{{ order.estimated_delivery_time|date:"H:i" }}</td>
+                                <td>{{ order.courier.name|default:"Не призначено" }}</td>
+                                <td class="text-danger">
+                                    {% if order.estimated_delivery_time %}
+                                        {{ order.estimated_delivery_time|timesince }}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">Немає прострочених замовлень</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-refresh every 30 seconds
+setTimeout(function() {
+    location.reload();
+}, 30000);
+</script>
+{% endblock %}

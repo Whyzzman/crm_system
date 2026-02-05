@@ -1,0 +1,390 @@
+{% extends 'crm/base.html' %}
+{% load static %}
+
+{% block title %}Аналітика Доставки{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+/* Theme-aware styling handled by base.css */
+.metric-card {
+    text-align: center;
+    padding: 20px;
+}
+
+.metric-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.metric-value.success { color: #27ae60; }
+.metric-value.warning { color: #f39c12; }
+.metric-value.danger { color: #e74c3c; }
+.metric-value.info { color: #3498db; }
+
+.chart-container {
+    position: relative;
+    height: 300px;
+    margin: 20px 0;
+}
+
+.courier-performance {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.courier-row {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.courier-row:last-child {
+    border-bottom: none;
+}
+
+.courier-name {
+    flex: 1;
+    font-weight: bold;
+}
+
+.courier-stats {
+    display: flex;
+    gap: 15px;
+    font-size: 0.9rem;
+}
+
+.performance-bar {
+    height: 20px;
+    background: #ecf0f1;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 5px 0;
+}
+
+.performance-fill {
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.performance-fill.excellent { background: #27ae60; }
+.performance-fill.good { background: #2ecc71; }
+.performance-fill.average { background: #f39c12; }
+.performance-fill.poor { background: #e74c3c; }
+
+.filters {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.date-filter {
+    display: flex;
+    gap: 15px;
+    align-items: end;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid logistics-page">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1><i class="fas fa-chart-bar"></i> Аналітика Доставки</h1>
+                <a href="{% url 'logistics_dashboard' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Повернутись до Панелі
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+        <form method="get" class="date-filter">
+            <div class="form-group">
+                <label for="date_from">Від дати:</label>
+                <input type="date" id="date_from" name="date_from" class="form-control" value="{{ date_from }}">
+            </div>
+            <div class="form-group">
+                <label for="date_to">До дати:</label>
+                <input type="date" id="date_to" name="date_to" class="form-control" value="{{ date_to }}">
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-filter"></i> Застосувати Фільтр
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="analytics-card metric-card">
+                <div class="metric-value info">{{ total_orders }}</div>
+                <div class="metric-label">Загально Замовлень</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="analytics-card metric-card">
+                <div class="metric-value success">{{ delivery_rate|floatformat:1 }}%</div>
+                <div class="metric-label">Рівень Доставки</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="analytics-card metric-card">
+                <div class="metric-value success">{{ on_time_rate|floatformat:1 }}%</div>
+                <div class="metric-label">Вчасна Доставка</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="analytics-card metric-card">
+                <div class="metric-value warning">{{ overdue_orders }}</div>
+                <div class="metric-label">Прострочені Замовлення</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Delivery Status Chart -->
+        <div class="col-md-6">
+            <div class="analytics-card">
+                <h4><i class="fas fa-pie-chart"></i> Розподіл Статусів Замовлень</h4>
+                <div class="chart-container">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Route Efficiency -->
+        <div class="col-md-6">
+            <div class="analytics-card">
+                <h4><i class="fas fa-route"></i> Ефективність Маршрутів</h4>
+                <div class="row text-center">
+                    <div class="col-6">
+                        <div class="metric-value info">{{ total_routes }}</div>
+                        <div class="metric-label">Загально Маршрутів</div>
+                    </div>
+                    <div class="col-6">
+                        <div class="metric-value success">{{ active_routes }}</div>
+                        <div class="metric-label">Активні Маршрути</div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="routeChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Courier Performance -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="analytics-card">
+                <h4><i class="fas fa-users"></i> Продуктивність Кур'єрів</h4>
+                <div class="courier-performance">
+                    {% for courier_stat in courier_stats %}
+                    <div class="courier-row">
+                        <div class="courier-name">{{ courier_stat.courier.name }}</div>
+                        <div class="courier-stats">
+                            <span><strong>{{ courier_stat.total_orders }}</strong> замовлень</span>
+                            <span><strong>{{ courier_stat.delivered_orders }}</strong> доставлено</span>
+                            <span><strong>{{ courier_stat.delivery_rate|floatformat:1 }}%</strong> рівень</span>
+                        </div>
+                        <div style="width: 150px; margin-left: 15px;">
+                            <div class="performance-bar">
+                                <div class="performance-fill {% if courier_stat.delivery_rate >= 95 %}excellent{% elif courier_stat.delivery_rate >= 85 %}good{% elif courier_stat.delivery_rate >= 70 %}average{% else %}poor{% endif %}" 
+                                     style="width: {{ courier_stat.delivery_rate }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-user-slash fa-2x mb-2"></i>
+                        <p>Немає даних про продуктивність кур'єрів</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delivery Time Analysis -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="analytics-card">
+                <h4><i class="fas fa-clock"></i> Тенденції Часу Доставки</h4>
+                <div class="chart-container">
+                    <canvas id="timeChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Geographic Distribution -->
+        <div class="col-md-6">
+            <div class="analytics-card">
+                <h4><i class="fas fa-map"></i> Розподіл Доставок</h4>
+                <div class="text-center py-4">
+                    <p class="text-muted">
+                        <i class="fas fa-map-marked-alt fa-3x mb-3"></i><br>
+                        Географічний аналіз незабаром
+                    </p>
+                    <small class="text-muted">
+                        Це показуватиме щільність доставок за районами, популярні маршрути та зони покриття
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Status Distribution Chart
+const statusCtx = document.getElementById('statusChart').getContext('2d');
+new Chart(statusCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Доставлено', 'В дорозі', 'Призначено', 'Нові', 'Скасовано'],
+        datasets: [{
+            data: [
+                {{ delivered_orders }},
+                {{ total_orders|add:"-"|add:delivered_orders|add:"-"|add:overdue_orders }},
+                {{ overdue_orders }},
+                {{ total_orders|add:"-"|add:delivered_orders|add:"-"|add:overdue_orders|add:"-"|add:overdue_orders }},
+                0
+            ],
+            backgroundColor: [
+                '#27ae60',
+                '#20c997',
+                '#007bff',
+                '#6c757d',
+                '#dc3545'
+            ],
+            borderWidth: 2,
+            borderColor: '#ffffff'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        legend: {
+            position: 'bottom'
+        },
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// Route Efficiency Chart
+const routeCtx = document.getElementById('routeChart').getContext('2d');
+new Chart(routeCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Цей тиждень', 'Минулий тиждень', 'Два тижні тому'],
+        datasets: [{
+            label: 'Маршрутів створено',
+            data: [{{ total_routes }}, Math.floor({{ total_routes }} * 0.8), Math.floor({{ total_routes }} * 0.6)],
+            backgroundColor: '#007bff',
+            borderColor: '#0056b3',
+            borderWidth: 1
+        }, {
+            label: 'Маршрутів завершено',
+            data: [{{ total_routes|add:"-"|add:active_routes }}, Math.floor({{ total_routes }} * 0.7), Math.floor({{ total_routes }} * 0.5)],
+            backgroundColor: '#28a745',
+            borderColor: '#1e7e34',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        },
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// Delivery Time Trends Chart
+const timeCtx = document.getElementById('timeChart').getContext('2d');
+new Chart(timeCtx, {
+    type: 'line',
+    data: {
+        labels: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'],
+        datasets: [{
+            label: 'Середній час доставки (годин)',
+            data: [2.5, 2.8, 2.2, 2.6, 3.1, 2.9, 2.4],
+            borderColor: '#007bff',
+            backgroundColor: 'rgba(0, 123, 255, 0.1)',
+            tension: 0.4,
+            fill: true
+        }, {
+            label: 'Відсоток вчасної доставки',
+            data: [95, 92, 98, 89, 85, 88, 94],
+            borderColor: '#28a745',
+            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+            tension: 0.4,
+            fill: true,
+            yAxisID: 'y1'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+            mode: 'index',
+            intersect: false,
+        },
+        scales: {
+            y: {
+                type: 'linear',
+                display: true,
+                position: 'left',
+                title: {
+                    display: true,
+                    text: 'Години'
+                }
+            },
+            y1: {
+                type: 'linear',
+                display: true,
+                position: 'right',
+                title: {
+                    display: true,
+                    text: 'Відсоток'
+                },
+                grid: {
+                    drawOnChartArea: false,
+                },
+            },
+        },
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// Auto-refresh every 5 minutes
+setInterval(function() {
+    location.reload();
+}, 300000);
+</script>
+{% endblock %}

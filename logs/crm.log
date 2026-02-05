@@ -1,0 +1,93 @@
+INFO 2025-09-03 19:54:34,880 views 14366 8340742336 Creating route for courier 1 with 2 orders
+INFO 2025-09-03 19:54:34,881 views 14366 8340742336 Route created successfully: 1
+INFO 2025-09-03 19:54:34,881 views 14366 8340742336 Updated 2 orders with courier 1
+INFO 2025-09-03 19:55:18,763 views 14697 6164393984 Creating route for courier 1 with 1 orders
+INFO 2025-09-03 19:55:18,769 views 14697 6164393984 Route created successfully: 1
+INFO 2025-09-03 19:55:18,771 views 14697 6164393984 Updated 1 orders with courier 1
+INFO 2025-09-03 19:55:24,966 views 14697 6164393984 Creating route for courier 1 with 2 orders
+INFO 2025-09-03 19:55:24,972 views 14697 6164393984 Route created successfully: 2
+INFO 2025-09-03 19:55:24,974 views 14697 6164393984 Updated 2 orders with courier 1
+INFO 2025-09-03 19:57:30,685 views 14697 6164393984 Creating route for courier 6 with 1 orders
+INFO 2025-09-03 19:57:30,689 views 14697 6164393984 Route created successfully: 3
+INFO 2025-09-03 19:57:30,691 views 14697 6164393984 Updated 1 orders with courier 6
+INFO 2025-09-03 20:07:14,638 views 15521 6163935232 Creating route for courier 6 with 1 orders
+INFO 2025-09-03 20:07:15,819 views 15521 6163935232 Route created successfully: 5
+INFO 2025-09-03 20:07:15,822 views 15521 6163935232 Updated 1 orders with courier 6
+INFO 2025-09-03 20:37:04,346 views 21127 6196015104 Creating route for courier 1 with 1 orders
+INFO 2025-09-03 20:37:05,531 views 21127 6196015104 Route created successfully: 6
+INFO 2025-09-03 20:37:05,534 views 21127 6196015104 Updated 1 orders with courier 1
+INFO 2025-09-03 20:37:15,683 views 21127 6196015104 Creating route for courier 6 with 1 orders
+INFO 2025-09-03 20:37:16,862 views 21127 6196015104 Route created successfully: 7
+INFO 2025-09-03 20:37:16,864 views 21127 6196015104 Updated 1 orders with courier 6
+INFO 2025-09-03 20:37:31,577 views 21127 6196015104 Creating route for courier 4 with 1 orders
+INFO 2025-09-03 20:37:32,751 views 21127 6196015104 Route created successfully: 8
+INFO 2025-09-03 20:37:32,753 views 21127 6196015104 Updated 1 orders with courier 4
+INFO 2025-09-03 20:37:48,026 views 21127 6196015104 Creating route for courier 1 with 1 orders
+INFO 2025-09-03 20:37:49,202 views 21127 6196015104 Route created successfully: 9
+INFO 2025-09-03 20:37:49,204 views 21127 6196015104 Updated 1 orders with courier 1
+INFO 2025-09-03 20:37:57,214 views 21127 6196015104 Creating route for courier 4 with 1 orders
+INFO 2025-09-03 20:37:58,412 views 21127 6196015104 Route created successfully: 10
+INFO 2025-09-03 20:37:58,414 views 21127 6196015104 Updated 1 orders with courier 4
+INFO 2025-09-03 22:37:24,848 views 31698 6125563904 Creating route for courier 4 with 1 orders
+INFO 2025-09-03 22:37:26,252 views 31698 6125563904 Route created successfully: 11
+INFO 2025-09-03 22:37:26,256 views 31698 6125563904 Updated 1 orders with courier 4
+INFO 2025-09-03 22:48:25,982 views 32080 6132854784 Creating route for courier 4 with 1 orders
+INFO 2025-09-03 22:48:27,175 views 32080 6132854784 Route created successfully: 12
+INFO 2025-09-03 22:48:27,179 views 32080 6132854784 Updated 1 orders with courier 4
+INFO 2025-09-03 22:50:18,400 views 32080 6132854784 Creating route for courier 4 with 1 orders
+INFO 2025-09-03 22:50:19,681 views 32080 6132854784 Route created successfully: 13
+INFO 2025-09-03 22:50:19,683 views 32080 6132854784 Updated 1 orders with courier 4
+INFO 2025-09-03 22:55:22,316 views 32080 6132854784 Creating route for courier 4 with 1 orders
+INFO 2025-09-03 22:55:23,510 views 32080 6132854784 Route created successfully: 14
+INFO 2025-09-03 22:55:23,512 views 32080 6132854784 Updated 1 orders with courier 4
+INFO 2025-09-04 07:52:36,171 email_notifications 3655 8827855040 Email отправлен: Заказ #1003 создан - CRM System -> ['test@example.com']
+INFO 2025-09-04 07:52:36,173 email_notifications 3655 8827855040 Email отправлен: Новый заказ #1003 - CRM System -> ['baysa2000@gmail.com', 'admin@example.com', 'test@example.com']
+INFO 2025-09-04 07:52:47,074 email_notifications 3786 8827855040 Email отправлен: Заказ #1004 создан - CRM System -> ['test@example.com']
+INFO 2025-09-04 07:52:47,077 email_notifications 3786 8827855040 Email отправлен: Новый заказ #1004 - CRM System -> ['baysa2000@gmail.com', 'admin@example.com', 'test@example.com']
+INFO 2025-09-04 07:52:47,080 email_notifications 3786 8827855040 Email отправлен: Статус заказа #1004 изменен - CRM System -> ['test@example.com']
+INFO 2025-09-04 07:52:47,082 email_notifications 3786 8827855040 Email отправлен: Курьер назначен для заказа #1004 - CRM System -> ['test@example.com']
+INFO 2025-09-04 07:52:47,084 email_notifications 3786 8827855040 Email отправлен: Новый заказ #1004 назначен вам - CRM System -> ['test@example.com']
+INFO 2025-09-04 07:52:47,088 email_notifications 3786 8827855040 Email отправлен: Платеж получен для заказа #1004 - CRM System -> ['test@example.com']
+INFO 2025-09-04 07:52:47,091 email_notifications 3786 8827855040 Email отправлен: Заказ #1004 доставлен - CRM System -> ['test@example.com']
+INFO 2025-09-04 07:54:25,909 email_notifications 3851 6155284480 Email отправлен: Заказ #1005 создан - CRM System -> []
+INFO 2025-09-04 07:54:25,925 email_notifications 3851 6155284480 Email отправлен: Новый заказ #1005 - CRM System -> ['baysa2000@gmail.com', 'admin@example.com', 'test@example.com']
+INFO 2025-09-04 07:54:25,925 views 3851 6155284480 Email уведомления отправлены для заказа #1005
+INFO 2025-09-20 13:35:03,079 views 3532 6190919680 Creating route for courier 10 with 1 orders
+INFO 2025-09-20 13:35:04,480 views 3532 6190919680 Route created successfully: 15
+INFO 2025-09-20 13:35:04,481 views 3532 6190919680 Updated 1 orders with courier 10
+INFO 2025-09-20 13:35:23,363 views 3532 6190919680 Creating route for courier 9 with 1 orders
+INFO 2025-09-20 13:35:24,635 views 3532 6190919680 Route created successfully: 16
+INFO 2025-09-20 13:35:24,636 views 3532 6190919680 Updated 1 orders with courier 9
+INFO 2025-09-20 13:36:05,025 views 3532 6190919680 Creating route for courier 13 with 2 orders
+INFO 2025-09-20 13:36:06,413 views 3532 6190919680 Route created successfully: 17
+INFO 2025-09-20 13:36:06,416 views 3532 6190919680 Updated 2 orders with courier 13
+INFO 2025-09-20 13:40:39,025 logistics 23517 8473813184 Using local route calculation for waypoints: [(50.4501, 30.5234), (49.8167, 24.0789), (49.8456, 24.0123)]
+INFO 2025-09-20 13:41:27,401 logistics 26966 8473813184 Using local route calculation for waypoints: [(49.8234, 24.0534), (49.8167, 24.0789), (49.8397, 24.0297), (49.8456, 24.0123)]
+INFO 2025-09-20 13:43:21,993 views 27168 6130003968 Creating route for courier 10 with 1 orders
+INFO 2025-09-20 13:43:21,994 logistics 27168 6130003968 Using local route calculation for waypoints: [(49.8234, 24.0534), (49.8456, 24.0123)]
+INFO 2025-09-20 13:43:21,998 views 27168 6130003968 Route created successfully: 21
+INFO 2025-09-20 13:43:22,000 views 27168 6130003968 Updated 1 orders with courier 10
+INFO 2025-09-20 13:43:34,977 views 27168 6130003968 Creating route for courier 13 with 1 orders
+INFO 2025-09-20 13:43:34,977 logistics 27168 6130003968 Using local route calculation for waypoints: [(49.8234, 24.0534), (49.8167, 24.0789)]
+INFO 2025-09-20 13:43:34,980 views 27168 6130003968 Route created successfully: 22
+INFO 2025-09-20 13:43:34,983 views 27168 6130003968 Updated 1 orders with courier 13
+INFO 2025-09-20 13:50:39,021 views 31606 6274904064 Creating route for courier 9 with 1 orders
+INFO 2025-09-20 13:50:40,219 views 31606 6274904064 Route created successfully: 24
+INFO 2025-09-20 13:50:40,222 views 31606 6274904064 Updated 1 orders with courier 9
+ERROR 2025-09-20 13:54:08,825 email_notifications 37536 6167834624 Ошибка отправки email: crm/emails/order_created_client.txt
+ERROR 2025-09-20 13:54:08,826 email_notifications 37536 6167834624 Ошибка отправки email: crm/emails/order_created_manager.txt
+INFO 2025-09-20 13:54:08,826 views 37536 6167834624 Email уведомления отправлены для заказа #1047
+INFO 2025-09-20 13:56:22,600 views 37536 6167834624 Creating route for courier 9 with 1 orders
+INFO 2025-09-20 13:56:23,781 views 37536 6167834624 Route created successfully: 25
+INFO 2025-09-20 13:56:23,783 views 37536 6167834624 Updated 1 orders with courier 9
+INFO 2025-09-20 13:57:46,981 views 37708 6198800384 Creating route for courier 10 with 1 orders
+INFO 2025-09-20 13:57:48,149 views 37708 6198800384 Route created successfully: 26
+INFO 2025-09-20 13:57:48,150 views 37708 6198800384 Updated 1 orders with courier 10
+INFO 2025-09-20 14:00:38,289 views 37708 6198800384 Creating route for courier 10 with 1 orders
+INFO 2025-09-20 14:00:39,531 views 37708 6198800384 Route created successfully: 27
+INFO 2025-09-20 14:00:39,532 views 37708 6198800384 Updated 1 orders with courier 10
+INFO 2025-09-21 20:08:31,957 views 6133 6161166336 Creating route for courier 10 with 1 orders
+INFO 2025-09-21 20:08:33,238 views 6133 6161166336 Route created successfully: 28
+INFO 2025-09-21 20:08:33,241 views 6133 6161166336 Updated 1 orders with courier 10
+ERROR 2026-02-04 21:46:26,499 views 35363 6137327616 AI support error: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=20)
+ERROR 2026-02-05 08:41:37,264 views 4156 6159626240 AI support error: HTTPConnectionPool(host='localhost', port=11434): Max retries exceeded with url: /api/chat (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x105a83290>: Failed to establish a new connection: [Errno 61] Connection refused'))

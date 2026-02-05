@@ -1,0 +1,14 @@
+{% extends "crm/base.html" %}
+
+{% block content %}
+<div class="container">
+    <h3>Видалення замовлення</h3>
+    <p>Ви дійсно хочете видалити замовлення <strong>{{ order.product }}</strong> для клієнта <strong>{{ order.client.name }}</strong>?</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <a href="{% url 'orders_list' %}" class="btn btn-secondary">Скасувати</a>
+        <button type="submit" class="btn btn-danger">Видалити</button>
+    </form>
+</div>
+{% endblock %}

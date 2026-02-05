@@ -1,0 +1,346 @@
+{% extends 'crm/base.html' %}
+{% load static %}
+
+{% block title %}Оптимізація Маршрутів{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Theme-aware styling handled by base.css */
+.order-selection {
+    max-height: 400px;
+    overflow-y: auto;
+    border-radius: 5px;
+    padding: 15px;
+}
+
+.order-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 5px;
+    border-radius: 3px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.order-checkbox {
+    margin-right: 10px;
+}
+
+.order-info {
+    flex-grow: 1;
+}
+
+.order-priority {
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.order-priority.urgent { background-color: #e74c3c; color: white; }
+.order-priority.high { background-color: #f39c12; color: white; }
+.order-priority.normal { background-color: #3498db; color: white; }
+.order-priority.low { background-color: #95a5a6; color: white; }
+
+.courier-card {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    background: white;
+    margin-bottom: 15px;
+}
+
+.courier-card.selected {
+    border-color: #007bff;
+    background-color: #e3f2fd;
+}
+
+.courier-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.courier-status {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.courier-status.available { background-color: #27ae60; }
+.courier-status.busy { background-color: #e74c3c; }
+
+.form-section {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.selection-summary {
+    position: sticky;
+    top: 20px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid logistics-page">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1><i class="fas fa-route"></i> Оптимізація Маршрутів</h1>
+                <a href="{% url 'logistics_dashboard' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Повернутись до Панелі
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Display messages -->
+    {% if messages %}
+        <div class="row mb-4">
+            <div class="col-12">
+                {% for message in messages %}
+                    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+                        <i class="fas fa-{% if message.tags == 'error' %}exclamation-triangle{% elif message.tags == 'success' %}check-circle{% else %}info-circle{% endif %}"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+    
+    <!-- Display form errors -->
+    {% if form.non_field_errors %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Form Errors:</strong>
+                    <ul class="mb-0">
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    
+    <form method="post" id="routeForm">
+        {% csrf_token %}
+        
+        <div class="row">
+            <div class="col-md-8">
+                <!-- Courier Selection -->
+                <div class="form-section">
+                    <h4><i class="fas fa-user"></i> Обрати Кур'єра</h4>
+                    <div class="form-group">
+                        {{ form.courier.label_tag }}
+                        {{ form.courier }}
+                        {% if form.courier.errors %}
+                            <div class="text-danger">{{ form.courier.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Order Selection -->
+                <div class="form-section">
+                    <h4><i class="fas fa-list"></i> Обрати Замовлення для Маршруту</h4>
+                    <div class="form-group">
+                        {{ form.orders.label_tag }}
+                        <div class="order-selection">
+                            {% for checkbox in form.orders %}
+                                <div class="order-item">
+                                    <div class="order-checkbox">
+                                        {{ checkbox.tag }}
+                                    </div>
+                                    <div class="order-info">
+                                        <strong>Замовлення №{{ checkbox.choice_value }}</strong> - {{ checkbox.choice_label }}
+                                        {% comment %}
+                                        <!-- This would need to be enhanced to show order details -->
+                                        <div class="text-muted small">
+                                            Client: {{ order.client.name }} | Address: {{ order.address }}
+                                        </div>
+                                        <span class="order-priority {{ order.priority }}">{{ order.get_priority_display }}</span>
+                                        {% endcomment %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        {% if form.orders.errors %}
+                            <div class="text-danger">{{ form.orders.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Route Name -->
+                <div class="form-section">
+                    <h4><i class="fas fa-tag"></i> Деталі Маршруту</h4>
+                    <div class="form-group">
+                        {{ form.route_name.label_tag }}
+                        {{ form.route_name }}
+                        <small class="form-text text-muted">{{ form.route_name.help_text }}</small>
+                        {% if form.route_name.errors %}
+                            <div class="text-danger">{{ form.route_name.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <!-- Selection Summary -->
+                <div class="selection-summary">
+                    <h5><i class="fas fa-clipboard-list"></i> Підсумок Маршруту</h5>
+                    <div id="selectedCourier" class="mb-3">
+                        <strong>Кур'єр:</strong> <span class="text-muted">Не обрано</span>
+                    </div>
+                    <div id="selectedOrders" class="mb-3">
+                        <strong>Замовлення:</strong> <span id="orderCount" class="badge badge-primary">0</span>
+                    </div>
+                    <div id="estimatedMetrics" class="mb-3 text-muted">
+                        <small>Оберіть кур'єра та замовлення для перегляду оцінок</small>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-block" id="createRouteBtn" disabled>
+                        <i class="fas fa-route"></i> Створити Оптимізований Маршрут
+                    </button>
+                </div>
+
+                <!-- Tips -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h6><i class="fas fa-lightbulb"></i> Поради з Оптимізації</h6>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success"></i>
+                                Групуйте замовлення за місцезнаходженням для ефективності
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success"></i>
+                                Враховуйте вмістимість транспорту
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success"></i>
+                                Пріоритизуйте термінові замовлення
+                            </li>
+                            <li class="mb-0">
+                                <i class="fas fa-check text-success"></i>
+                                Враховуйте транспортні потоки
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const courierSelect = document.getElementById('id_courier');
+    const orderCheckboxes = document.querySelectorAll('input[name="orders"]');
+    const selectedCourierDiv = document.getElementById('selectedCourier');
+    const orderCountBadge = document.getElementById('orderCount');
+    const createRouteBtn = document.getElementById('createRouteBtn');
+
+    function updateSummary() {
+        // Update selected courier
+        const selectedCourier = courierSelect.options[courierSelect.selectedIndex];
+        if (selectedCourier.value) {
+            selectedCourierDiv.innerHTML = `<strong>Courier:</strong> ${selectedCourier.text}`;
+        } else {
+            selectedCourierDiv.innerHTML = '<strong>Кур\'єр:</strong> <span class="text-muted">Не обрано</span>';
+        }
+
+        // Update selected orders count
+        const selectedOrders = Array.from(orderCheckboxes).filter(cb => cb.checked);
+        orderCountBadge.textContent = selectedOrders.length;
+
+        // Enable/disable create button
+        createRouteBtn.disabled = !selectedCourier.value || selectedOrders.length === 0;
+        
+        // Update button text based on validation
+        if (!selectedCourier.value) {
+            createRouteBtn.title = 'Будь ласка, спочатку оберіть кур\'єра';
+        } else if (selectedOrders.length === 0) {
+            createRouteBtn.title = 'Будь ласка, оберіть хоча б одне замовлення';
+        } else {
+            createRouteBtn.title = `Створити маршрут з ${selectedOrders.length} замовленням(и)`;
+        }
+    }
+
+    // Event listeners
+    courierSelect.addEventListener('change', updateSummary);
+    orderCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateSummary);
+    });
+
+    // Select all / deselect all functionality
+    const selectAllBtn = document.createElement('button');
+    selectAllBtn.type = 'button';
+    selectAllBtn.className = 'btn btn-sm btn-outline-primary mr-2 mb-3';
+    selectAllBtn.innerHTML = '<i class="fas fa-check-square"></i> Обрати Все';
+    selectAllBtn.onclick = function() {
+        orderCheckboxes.forEach(cb => cb.checked = true);
+        updateSummary();
+    };
+
+    const deselectAllBtn = document.createElement('button');
+    deselectAllBtn.type = 'button';
+    deselectAllBtn.className = 'btn btn-sm btn-outline-secondary mb-3';
+    deselectAllBtn.innerHTML = '<i class="fas fa-square"></i> Скасувати Все';
+    deselectAllBtn.onclick = function() {
+        orderCheckboxes.forEach(cb => cb.checked = false);
+        updateSummary();
+    };
+
+    // Insert buttons before order selection
+    const orderSelection = document.querySelector('.order-selection');
+    orderSelection.parentNode.insertBefore(selectAllBtn, orderSelection);
+    orderSelection.parentNode.insertBefore(deselectAllBtn, orderSelection);
+
+    // Form validation before submission
+    document.getElementById('routeForm').addEventListener('submit', function(e) {
+        const selectedCourier = courierSelect.value;
+        const selectedOrders = Array.from(orderCheckboxes).filter(cb => cb.checked);
+        
+        if (!selectedCourier) {
+            e.preventDefault();
+            alert('Будь ласка, оберіть кур\'єра.');
+            return false;
+        }
+        
+        if (selectedOrders.length === 0) {
+            e.preventDefault();
+            alert('Будь ласка, оберіть хоча б одне замовлення.');
+            return false;
+        }
+        
+        // Show loading state
+        createRouteBtn.disabled = true;
+        createRouteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Створення Маршруту...';
+        
+        return true;
+    });
+    
+    // Initial summary update
+    updateSummary();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,467 @@
+{% extends "crm/base.html" %}
+
+{% block title %}CRM Logistics - Система управління доставкою{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 100px 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="white" opacity="0.1"><polygon points="0,100 1000,0 1000,100"/></svg>');
+    background-size: cover;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.hero-subtitle {
+    font-size: 1.3rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+}
+
+/* Features Section */
+.features-section {
+    padding: 80px 0;
+    background: #f8f9fa;
+}
+
+.feature-card {
+    background: white;
+    border-radius: 15px;
+    padding: 3rem 2rem;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+    border: none;
+}
+
+.feature-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+.feature-icon {
+    font-size: 3.5rem;
+    color: #667eea;
+    margin-bottom: 1.5rem;
+    display: block;
+}
+
+.feature-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+}
+
+.feature-description {
+    color: #6c757d;
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+/* Stats Section */
+.stats-section {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    color: white;
+    padding: 60px 0;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 1rem;
+}
+
+.stat-number {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #3498db;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+/* Benefits Section */
+.benefits-section {
+    padding: 80px 0;
+    background: white;
+}
+
+.benefit-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border-left: 4px solid #667eea;
+}
+
+.benefit-icon {
+    font-size: 2rem;
+    color: #667eea;
+    margin-right: 1.5rem;
+    min-width: 50px;
+}
+
+.benefit-content h5 {
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.benefit-content p {
+    color: #6c757d;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Contact Section */
+.contact-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 60px 0;
+    text-align: center;
+}
+
+.contact-info {
+    background: rgba(255,255,255,0.1);
+    border-radius: 15px;
+    padding: 2rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.contact-item {
+    margin-bottom: 1rem;
+}
+
+.contact-item i {
+    margin-right: 0.75rem;
+    width: 20px;
+    text-align: center;
+}
+
+/* Dark theme adjustments */
+.dark-theme .features-section {
+    background: #2c3e50;
+}
+
+.dark-theme .feature-card {
+    background: #34495e;
+    color: #ecf0f1;
+}
+
+.dark-theme .feature-title {
+    color: #ecf0f1;
+}
+
+.dark-theme .benefits-section {
+    background: #2c3e50;
+}
+
+.dark-theme .benefit-item {
+    background: #34495e;
+    border-left-color: #3498db;
+}
+
+.dark-theme .benefit-content h5 {
+    color: #ecf0f1;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.1rem;
+    }
+    
+    .feature-card {
+        margin-bottom: 2rem;
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="hero-title">CRM Logistics</h1>
+            <p class="hero-subtitle">Професійна система управління доставкою та логістикою</p>
+            <div class="row justify-content-center mt-4">
+                <div class="col-md-8">
+                    <p class="lead">
+                        Оптимізуйте свій бізнес з нашою комплексною CRM системою для управління замовленнями, 
+                        кур'єрами та логістичними процесами
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="display-4 font-weight-bold text-dark mb-3">Основні можливості</h2>
+                <p class="lead text-muted">Все необхідне для ефективного управління логістикою</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="feature-card">
+                    <i class="fas fa-shopping-cart feature-icon"></i>
+                    <h4 class="feature-title">Управління замовленнями</h4>
+                    <p class="feature-description">
+                        Повний контроль над замовленнями від створення до доставки. 
+                        Відстеження статусів, автоматичні сповіщення та детальна аналітика.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="feature-card">
+                    <i class="fas fa-route feature-icon"></i>
+                    <h4 class="feature-title">Оптимізація маршрутів</h4>
+                    <p class="feature-description">
+                        Інтелектуальна система планування маршрутів для мінімізації часу доставки 
+                        та витрат палива. GPS-відстеження в реальному часі.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="feature-card">
+                    <i class="fas fa-users feature-icon"></i>
+                    <h4 class="feature-title">База клієнтів</h4>
+                    <p class="feature-description">
+                        Централізована база даних клієнтів з історією замовлень, 
+                        адресами доставки та персональними налаштуваннями.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="feature-card">
+                    <i class="fas fa-motorcycle feature-icon"></i>
+                    <h4 class="feature-title">Управління кур'єрами</h4>
+                    <p class="feature-description">
+                        Ефективне управління командою кур'єрів, розподіл навантаження 
+                        та контроль продуктивності доставки.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="feature-card">
+                    <i class="fas fa-credit-card feature-icon"></i>
+                    <h4 class="feature-title">Платіжна система</h4>
+                    <p class="feature-description">
+                        Повна інтеграція платіжних систем з підтримкою готівкових та 
+                        безготівкових розрахунків, включаючи онлайн-платежі.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="feature-card">
+                    <i class="fas fa-chart-bar feature-icon"></i>
+                    <h4 class="feature-title">Аналітика та звіти</h4>
+                    <p class="feature-description">
+                        Детальна аналітика продуктивності, фінансові звіти та 
+                        інсайти для прийняття обґрунтованих бізнес-рішень.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-item">
+                    <span class="stat-number">500+</span>
+                    <span class="stat-label">Доставок щодня</span>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-item">
+                    <span class="stat-number">50+</span>
+                    <span class="stat-label">Активних кур'єрів</span>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-item">
+                    <span class="stat-number">1000+</span>
+                    <span class="stat-label">Задоволених клієнтів</span>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-item">
+                    <span class="stat-number">99.9%</span>
+                    <span class="stat-label">Швидкість доставки</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Benefits Section -->
+<section class="benefits-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="display-4 font-weight-bold text-dark mb-3">Чому обирають нас?</h2>
+                <p class="lead text-muted">Переваги роботи з нашою системою</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="benefit-item">
+                    <i class="fas fa-bolt benefit-icon"></i>
+                    <div class="benefit-content">
+                        <h5>Швидкість та ефективність</h5>
+                        <p>Автоматизація процесів дозволяє скоротити час обробки замовлень на 70% та підвищити загальну ефективність роботи.</p>
+                    </div>
+                </div>
+                
+                <div class="benefit-item">
+                    <i class="fas fa-shield-alt benefit-icon"></i>
+                    <div class="benefit-content">
+                        <h5>Надійність та безпека</h5>
+                        <p>Високий рівень захисту даних, регулярні резервні копії та 99.9% гарантія роботи системи.</p>
+                    </div>
+                </div>
+                
+                <div class="benefit-item">
+                    <i class="fas fa-mobile-alt benefit-icon"></i>
+                    <div class="benefit-content">
+                        <h5>Мобільність</h5>
+                        <p>Доступ до системи з будь-якого пристрою - комп'ютера, планшета або смартфона. Працюйте звідки завгодно.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="benefit-item">
+                    <i class="fas fa-dollar-sign benefit-icon"></i>
+                    <div class="benefit-content">
+                        <h5>Економія коштів</h5>
+                        <p>Оптимізація маршрутів та автоматизація процесів допомагають знизити операційні витрати на 40-60%.</p>
+                    </div>
+                </div>
+                
+                <div class="benefit-item">
+                    <i class="fas fa-headset benefit-icon"></i>
+                    <div class="benefit-content">
+                        <h5>24/7 підтримка</h5>
+                        <p>Цілодобова технічна підтримка, швидке вирішення проблем та регулярні оновлення системи.</p>
+                    </div>
+                </div>
+                
+                <div class="benefit-item">
+                    <i class="fas fa-expand-arrows-alt benefit-icon"></i>
+                    <div class="benefit-content">
+                        <h5>Масштабованість</h5>
+                        <p>Система легко адаптується до зростання вашого бізнесу - від кількох замовлень до тисяч доставок на день.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section class="contact-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <h2 class="display-4 font-weight-bold mb-4">Зв'яжіться з нами</h2>
+                <p class="lead mb-4">
+                    Готові оптимізувати свою логістику? Наша команда допоможе впровадити рішення, 
+                    яке ідеально підходить для вашого бізнесу.
+                </p>
+                
+                <div class="contact-info">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="contact-item">
+                                <i class="fas fa-phone"></i>
+                                <span>+380(50)269-89-77</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="contact-item">
+                                <i class="fas fa-envelope"></i>
+                                <span>info@crm-logistics.com</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="contact-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>Львів, Україна</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <p class="mb-2">
+                            <i class="fas fa-clock"></i>
+                            Робочі години: Пн-Пт 9:00-18:00, Сб-Нд 10:00-16:00
+                        </p>
+                        <p class="mb-0">
+                            <i class="fas fa-headset"></i>
+                            Технічна підтримка: 24/7
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

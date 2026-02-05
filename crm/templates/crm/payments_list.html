@@ -1,0 +1,159 @@
+{% extends 'crm/base.html' %}
+
+{% block title %}Платежі{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-credit-card me-2"></i>Управління платежами</h2>
+            </div>
+
+            <!-- Фільтри -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-3">
+                            <label for="status" class="form-label">Статус</label>
+                            <select name="status" id="status" class="form-select">
+                                <option value="">Всі статуси</option>
+                                {% for value, label in payment_statuses %}
+                                    <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="method" class="form-label">Спосіб оплати</label>
+                            <select name="method" id="method" class="form-select">
+                                <option value="">Всі способи</option>
+                                {% for value, label in payment_methods %}
+                                    <option value="{{ value }}" {% if method_filter == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="date_from" class="form-label">Від дати</label>
+                            <input type="date" name="date_from" id="date_from" class="form-control" value="{{ request.GET.date_from }}">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="date_to" class="form-label">До дати</label>
+                            <input type="date" name="date_to" id="date_to" class="form-control" value="{{ request.GET.date_to }}">
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary me-2">
+                                <i class="fas fa-search"></i> Фільтр
+                            </button>
+                            <a href="{% url 'payments_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i>
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Список платежів -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Замовлення</th>
+                                    <th>Клієнт</th>
+                                    <th>Сума</th>
+                                    <th>Спосіб оплати</th>
+                                    <th>Статус</th>
+                                    <th>Дата створення</th>
+                                    <th>Оброблено</th>
+                                    <th>Дії</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for payment in payments %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'payment_detail' payment.id %}" class="text-decoration-none">
+                                            #{{ payment.id }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'order_update' payment.order.id %}" class="text-decoration-none">
+                                            #{{ payment.order.id }}
+                                        </a>
+                                    </td>
+                                    <td>{{ payment.order.client.name }}</td>
+                                    <td>
+                                        <strong>{{ payment.amount }} грн</strong>
+                                        {% if payment.change_amount %}
+                                            <br><small class="text-muted">Здача: {{ payment.change_amount }} грн</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ payment.get_method_display }}</span>
+                                    </td>
+                                    <td>
+                                        {% if payment.status == 'completed' %}
+                                            <span class="badge bg-success">{{ payment.get_status_display }}</span>
+                                        {% elif payment.status == 'pending' %}
+                                            <span class="badge bg-warning">{{ payment.get_status_display }}</span>
+                                        {% elif payment.status == 'failed' %}
+                                            <span class="badge bg-danger">{{ payment.get_status_display }}</span>
+                                        {% elif payment.status == 'refunded' %}
+                                            <span class="badge bg-info">{{ payment.get_status_display }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ payment.get_status_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ payment.created_at|date:"d.m.Y H:i" }}</td>
+                                    <td>
+                                        {% if payment.processed_by %}
+                                            <small>{{ payment.processed_by.username }}</small><br>
+                                            <small class="text-muted">{{ payment.processed_at|date:"d.m.Y H:i" }}</small>
+                                        {% else %}
+                                            <span class="text-muted">—</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a href="{% url 'payment_detail' payment.id %}" 
+                                               class="btn btn-outline-info" title="Переглянути">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            {% if payment.status == 'pending' %}
+                                                <a href="{% url 'payment_process' payment.id %}" 
+                                                   class="btn btn-outline-success" title="Обробити">
+                                                    <i class="fas fa-check"></i>
+                                                </a>
+                                            {% endif %}
+                                            {% if payment.status == 'completed' and user.is_superuser %}
+                                                <a href="{% url 'payment_refund' payment.id %}" 
+                                                   class="btn btn-outline-warning" title="Повернути">
+                                                    <i class="fas fa-undo"></i>
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="9" class="text-center text-muted py-4">
+                                        <i class="fas fa-credit-card fa-3x mb-3"></i><br>
+                                        Платежі не знайдено
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

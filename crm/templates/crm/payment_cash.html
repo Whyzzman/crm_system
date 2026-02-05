@@ -1,0 +1,154 @@
+{% extends 'crm/base.html' %}
+
+{% block title %}Готівкова оплата - Замовлення #{{ order.id }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-money-bill-wave me-2"></i>Готівкова оплата</h4>
+                    <p class="mb-0 text-muted">Замовлення #{{ order.id }} - {{ order.client.name }}</p>
+                </div>
+                <div class="card-body">
+                    <!-- Інформація про замовлення -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="border rounded p-3 bg-light">
+                                <h6>Деталі замовлення:</h6>
+                                <ul class="list-unstyled mb-0">
+                                    <li><strong>Товар:</strong> {{ order.product }}</li>
+                                    <li><strong>Кількість:</strong> {{ order.quantity }}</li>
+                                    <li><strong>Клієнт:</strong> {{ order.client.name }}</li>
+                                    <li><strong>Адреса:</strong> {{ order.address }}</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="border rounded p-3 bg-primary bg-opacity-10">
+                                <h6>Розрахунок суми:</h6>
+                                <table class="table table-sm table-borderless mb-0">
+                                    <tbody>
+                                        <tr>
+                                            <td>Базова ціна:</td>
+                                            <td class="text-end">{{ order.base_price }} грн</td>
+                                        </tr>
+                                        {% if order.additional_fees > 0 %}
+                                        <tr>
+                                            <td>Додаткові послуги:</td>
+                                            <td class="text-end">+{{ order.additional_fees }} грн</td>
+                                        </tr>
+                                        {% endif %}
+                                        {% if order.discount > 0 %}
+                                        <tr class="text-success">
+                                            <td>Знижка:</td>
+                                            <td class="text-end">-{{ order.discount }} грн</td>
+                                        </tr>
+                                        {% endif %}
+                                        <tr class="border-top fw-bold fs-5">
+                                            <td>До оплати:</td>
+                                            <td class="text-end text-primary">{{ order.total_price }} грн</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Форма оплати -->
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.amount.id_for_label }}" class="form-label">
+                                        <strong>Сума до оплати</strong>
+                                    </label>
+                                    {{ form.amount }}
+                                    {% if form.amount.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.amount.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.cash_received.id_for_label }}" class="form-label">
+                                        <strong>Отримано готівки *</strong>
+                                    </label>
+                                    {{ form.cash_received }}
+                                    {% if form.cash_received.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.cash_received.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.calculated_change.id_for_label }}" class="form-label">
+                                        <strong>Здача</strong>
+                                    </label>
+                                    {{ form.calculated_change }}
+                                    <small class="form-text text-muted">Розраховується автоматично</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.payment_notes.id_for_label }}" class="form-label">
+                                Примітки
+                            </label>
+                            {{ form.payment_notes }}
+                            {% if form.payment_notes.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.payment_notes.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'order_update' order.id %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> Назад
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-check"></i> Обробити оплату
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const amountField = document.getElementById('{{ form.amount.id_for_label }}');
+    const cashReceivedField = document.getElementById('{{ form.cash_received.id_for_label }}');
+    const changeField = document.getElementById('{{ form.calculated_change.id_for_label }}');
+    
+    function calculateChange() {
+        const amount = parseFloat(amountField.value) || 0;
+        const cashReceived = parseFloat(cashReceivedField.value) || 0;
+        const change = Math.max(cashReceived - amount, 0);
+        changeField.value = change.toFixed(2);
+    }
+    
+    cashReceivedField.addEventListener('input', calculateChange);
+    calculateChange(); // Initial calculation
+});
+</script>
+{% endblock %}

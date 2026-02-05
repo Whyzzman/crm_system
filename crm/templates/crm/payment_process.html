@@ -1,0 +1,190 @@
+{% extends 'crm/base.html' %}
+
+{% block title %}Обробити платіж #{{ payment.id }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-credit-card me-2"></i>Обробити платіж</h4>
+                    <p class="mb-0 text-muted">Платіж #{{ payment.id }} - Замовлення #{{ order.id }}</p>
+                </div>
+                <div class="card-body">
+                    <!-- Інформація про платіж -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="border rounded p-3 bg-light">
+                                <h6>Інформація про платіж:</h6>
+                                <ul class="list-unstyled mb-0">
+                                    <li><strong>ID платежу:</strong> #{{ payment.id }}</li>
+                                    <li><strong>Сума:</strong> {{ payment.amount }} грн</li>
+                                    <li><strong>Поточний статус:</strong> 
+                                        <span class="badge bg-warning">{{ payment.get_status_display }}</span>
+                                    </li>
+                                    <li><strong>Створено:</strong> {{ payment.created_at|date:"d.m.Y H:i" }}</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="border rounded p-3 bg-primary bg-opacity-10">
+                                <h6>Замовлення:</h6>
+                                <ul class="list-unstyled mb-0">
+                                    <li><strong>Клієнт:</strong> {{ order.client.name }}</li>
+                                    <li><strong>Товар:</strong> {{ order.product }}</li>
+                                    <li><strong>Адреса:</strong> {{ order.address }}</li>
+                                    <li><strong>Статус:</strong> 
+                                        <span class="badge bg-info">{{ order.get_status_display }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Форма обробки платежу -->
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label class="form-label"><strong>Спосіб оплати *</strong></label>
+                            <div class="row">
+                                {% for choice in form.payment_method %}
+                                <div class="col-md-6 mb-2">
+                                    <div class="form-check">
+                                        {{ choice.tag }}
+                                        <label class="form-check-label" for="{{ choice.id_for_label }}">
+                                            {{ choice.choice_label }}
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% if form.payment_method.errors %}
+                                <div class="text-danger mt-1">
+                                    {{ form.payment_method.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Поля для готівкової оплати -->
+                        <div id="cash-fields" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.cash_received.id_for_label }}" class="form-label">
+                                            <strong>Отримано готівки *</strong>
+                                        </label>
+                                        {{ form.cash_received }}
+                                        {% if form.cash_received.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.cash_received.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label"><strong>Здача</strong></label>
+                                        <input type="text" class="form-control" id="calculated-change" readonly placeholder="Буде розрахована">
+                                        <small class="form-text text-muted">Розраховується автоматично</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Поля для безготівкової оплати -->
+                        <div id="card-fields" style="display: none;">
+                            <div class="mb-3">
+                                <label for="{{ form.transaction_id.id_for_label }}" class="form-label">
+                                    ID транзакції
+                                </label>
+                                {{ form.transaction_id }}
+                                {% if form.transaction_id.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.transaction_id.errors }}
+                                    </div>
+                                {% endif %}
+                                <small class="form-text text-muted">Введіть номер транзакції з терміналу або системи онлайн-платежів</small>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.payment_notes.id_for_label }}" class="form-label">
+                                Примітки
+                            </label>
+                            {{ form.payment_notes }}
+                            {% if form.payment_notes.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.payment_notes.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'payment_detail' payment.id %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> Назад
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-check"></i> Завершити платіж
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const paymentMethodRadios = document.querySelectorAll('input[name="payment_method"]');
+    const cashFields = document.getElementById('cash-fields');
+    const cardFields = document.getElementById('card-fields');
+    const cashReceivedField = document.getElementById('{{ form.cash_received.id_for_label }}');
+    const calculatedChangeField = document.getElementById('calculated-change');
+    const paymentAmount = {{ payment.amount }};
+    
+    function toggleFields() {
+        const selectedMethod = document.querySelector('input[name="payment_method"]:checked').value;
+        
+        if (selectedMethod === 'cash') {
+            cashFields.style.display = 'block';
+            cardFields.style.display = 'none';
+        } else {
+            cashFields.style.display = 'none';
+            cardFields.style.display = 'block';
+        }
+    }
+    
+    function calculateChange() {
+        if (cashReceivedField.value) {
+            const cashReceived = parseFloat(cashReceivedField.value) || 0;
+            const change = Math.max(cashReceived - paymentAmount, 0);
+            calculatedChangeField.value = change.toFixed(2) + ' грн';
+        } else {
+            calculatedChangeField.value = '';
+        }
+    }
+    
+    // Event listeners
+    paymentMethodRadios.forEach(radio => {
+        radio.addEventListener('change', toggleFields);
+    });
+    
+    if (cashReceivedField) {
+        cashReceivedField.addEventListener('input', calculateChange);
+    }
+    
+    // Initial setup
+    toggleFields();
+    calculateChange();
+});
+</script>
+{% endblock %}

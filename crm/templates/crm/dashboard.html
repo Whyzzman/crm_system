@@ -1,0 +1,462 @@
+{% extends "crm/base.html" %}
+
+{% block title %}Статистика - Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-primary">
+            <i class="fas fa-chart-line me-2"></i>Панель управління
+        </h2>
+        <small class="text-muted">Оновлено: {% now "H:i" %}</small>
+    </div>
+
+    <!-- KPI Метрики -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Замовлення (Сьогодні)
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ orders_today }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Дохід (Цей місяць)
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ revenue_this_month|floatformat:1 }} грн</div>
+                            {% if revenue_growth > 0 %}
+                                <span class="text-success small">
+                                    <i class="fas fa-arrow-up"></i> +{{ revenue_growth }}%
+                                </span>
+                            {% elif revenue_growth < 0 %}
+                                <span class="text-danger small">
+                                    <i class="fas fa-arrow-down"></i> {{ revenue_growth }}%
+                                </span>
+                            {% endif %}
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Середній чек
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ avg_order_value|floatformat:1 }} грн</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calculator fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Активні кур'єри
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ active_couriers }} / {{ total_couriers }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-motorcycle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Швидка статистика -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-center bg-light">
+                <div class="card-body">
+                    <h4 class="card-title text-primary">{{ total_orders }}</h4>
+                    <p class="card-text">Всього замовлень</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-center bg-light">
+                <div class="card-body">
+                    <h4 class="card-title text-success">{{ total_revenue|floatformat:1 }} грн</h4>
+                    <p class="card-text">Загальний дохід</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-center bg-light">
+                <div class="card-body">
+                    <h4 class="card-title text-info">{{ total_clients }}</h4>
+                    <p class="card-text">Клієнтів</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-center bg-light">
+                <div class="card-body">
+                    <h4 class="card-title text-warning">{{ revenue_today|floatformat:1 }} грн</h4>
+                    <p class="card-text">Дохід сьогодні</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Графіки -->
+    <div class="row mb-4">
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-chart-area me-2"></i>Замовлення та Дохід за тиждень
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="areaChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-chart-pie me-2"></i>Статуси замовлень
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Таблиці ТОП-ів -->
+    <div class="row mb-4">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-users me-2"></i>ТОП-5 Кур'єрів
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-borderless">
+                            <thead>
+                                <tr>
+                                    <th>Кур'єр</th>
+                                    <th>Замовлень</th>
+                                    <th>Виконано</th>
+                                    <th>Ефективність</th>
+                                    <th>Дохід</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for courier in top_couriers %}
+                                <tr>
+                                    <td>{{ courier.name }}</td>
+                                    <td><span class="badge bg-primary">{{ courier.order_count }}</span></td>
+                                    <td><span class="badge bg-success">{{ courier.completed_orders }}</span></td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar" role="progressbar" 
+                                                 style="width: {{ courier.success_rate }}%"
+                                                 aria-valuenow="{{ courier.success_rate }}" 
+                                                 aria-valuemin="0" aria-valuemax="100">
+                                                {{ courier.success_rate }}%
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><strong>{{ courier.total_revenue|floatformat:1 }} грн</strong></td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">Немає даних</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-crown me-2"></i>ТОП-5 Клієнтів
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-borderless">
+                            <thead>
+                                <tr>
+                                    <th>Клієнт</th>
+                                    <th>Замовлень</th>
+                                    <th>Витрачено</th>
+                                    <th>Середній чек</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for client in top_clients %}
+                                <tr>
+                                    <td>{{ client.name }}</td>
+                                    <td><span class="badge bg-info">{{ client.order_count }}</span></td>
+                                    <td><strong>{{ client.total_spent|floatformat:1 }} грн</strong></td>
+                                    <td>{{ client.avg_order_value|floatformat:1 }} грн</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted">Немає даних</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+</div>
+
+    <!-- Статистика оплат -->
+<div class="row mb-4">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-tasks me-2"></i>Статуси замовлень
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% for status_code, status_data in status_stats.items %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>{{ status_data.name }}</span>
+                        <span class="badge bg-secondary">{{ status_data.count }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-credit-card me-2"></i>Статуси платежів
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% for status_code, status_data in payment_stats.items %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>{{ status_data.name }}</span>
+                        <span class="badge 
+                            {% if status_code == 'completed' %}bg-success
+                            {% elif status_code == 'pending' %}bg-warning
+                            {% elif status_code == 'failed' %}bg-danger
+                            {% else %}bg-secondary{% endif %}">
+                            {{ status_data.count }}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+  </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Комбінований графік замовлень та доходів
+    const areaCtx = document.getElementById('areaChart').getContext('2d');
+    new Chart(areaCtx, {
+    type: 'line',
+    data: {
+      labels: [{% for label in labels_last_week %}'{{ label }}',{% endfor %}],
+      datasets: [{
+                label: 'Замовлення',
+        data: [{% for count in orders_last_week %}{{ count }},{% endfor %}],
+                borderColor: 'rgba(78, 115, 223, 1)',
+                backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                fill: true,
+                tension: 0.3,
+                yAxisID: 'y'
+            }, {
+                label: 'Дохід (грн)',
+                data: [{% for revenue in revenue_last_week %}{{ revenue }},{% endfor %}],
+                borderColor: 'rgba(28, 200, 138, 1)',
+                backgroundColor: 'rgba(28, 200, 138, 0.05)',
+        fill: true,
+        tension: 0.3,
+                yAxisID: 'y1'
+      }]
+    },
+    options: {
+      responsive: true,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+      scales: {
+                x: {
+                    display: true,
+                    title: {
+                        display: true,
+                        text: 'День тижня'
+                    }
+                },
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Кількість замовлень'
+                    },
+                    beginAtZero: true
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'Дохід (грн)'
+                    },
+          beginAtZero: true,
+                    grid: {
+                        drawOnChartArea: false,
+                    },
+          }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+        }
+      }
+    }
+  });
+
+    // Кругова діаграма статусів
+    const statusLabels = [];
+    const statusData = [];
+    const statusColors = [];
+    
+    {% for status_code, status_data in status_stats.items %}
+        {% if status_data.count > 0 %}
+            statusLabels.push('{{ status_data.name }}');
+            statusData.push({{ status_data.count }});
+            {% if status_code == 'new' %}
+                statusColors.push('#6c757d');
+            {% elif status_code == 'assigned' %}
+                statusColors.push('#0d6efd');
+            {% elif status_code == 'picked_up' %}
+                statusColors.push('#fd7e14');
+            {% elif status_code == 'in_transit' %}
+                statusColors.push('#6f42c1');
+            {% elif status_code == 'delivered' %}
+                statusColors.push('#198754');
+            {% elif status_code == 'cancelled' %}
+                statusColors.push('#dc3545');
+            {% else %}
+                statusColors.push('#adb5bd');
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    new Chart(statusCtx, {
+        type: 'doughnut',
+    data: {
+            labels: statusLabels,
+      datasets: [{
+                data: statusData,
+                backgroundColor: statusColors,
+                borderWidth: 2,
+                borderColor: '#ffffff'
+      }]
+    },
+    options: {
+      responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                }
+            }
+        }
+    });
+  });
+</script>
+
+<style>
+.border-left-primary {
+    border-left: 0.25rem solid #4e73df !important;
+}
+.border-left-success {
+    border-left: 0.25rem solid #1cc88a !important;
+}
+.border-left-info {
+    border-left: 0.25rem solid #36b9cc !important;
+}
+.border-left-warning {
+    border-left: 0.25rem solid #f6c23e !important;
+}
+
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+}
+
+.text-xs {
+    font-size: 0.7rem;
+}
+
+.progress {
+    background-color: #e9ecef;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #5a5c69;
+    font-size: 0.85rem;
+}
+</style>
+{% endblock %}

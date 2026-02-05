@@ -1,0 +1,380 @@
+{% extends "crm/base.html" %}
+
+{% block title %}Швидка оплата - Замовлення #{{ order.id }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-credit-card me-2"></i>Швидка оплата
+                    </h4>
+                    <p class="mb-0 opacity-75">Замовлення #{{ order.id }} - {{ order.client.name }}</p>
+                </div>
+                <div class="card-body">
+                    <!-- Інформація про замовлення -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6><i class="fas fa-shopping-cart me-2"></i>Деталі замовлення:</h6>
+                                    <ul class="list-unstyled mb-0">
+                                        <li><strong>Товар:</strong> {{ order.product }}</li>
+                                        <li><strong>Кількість:</strong> {{ order.quantity }}</li>
+                                        <li><strong>Клієнт:</strong> {{ order.client.name }}</li>
+                                        <li><strong>Телефон:</strong> {{ order.client.phone }}</li>
+                                        <li><strong>Адреса:</strong> {{ order.address }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-success bg-opacity-10 border-success">
+                                <div class="card-body">
+                                    <h6><i class="fas fa-calculator me-2"></i>Розрахунок суми:</h6>
+                                    <table class="table table-sm table-borderless mb-0">
+                                        <tbody>
+                                            <tr>
+                                                <td>Базова ціна:</td>
+                                                <td class="text-end">{{ order.base_price }} грн</td>
+                                            </tr>
+                                            {% if order.additional_fees > 0 %}
+                                            <tr>
+                                                <td>Додаткові послуги:</td>
+                                                <td class="text-end">+{{ order.additional_fees }} грн</td>
+                                            </tr>
+                                            {% endif %}
+                                            {% if order.discount > 0 %}
+                                            <tr class="text-success">
+                                                <td>Знижка:</td>
+                                                <td class="text-end">-{{ order.discount }} грн</td>
+                                            </tr>
+                                            {% endif %}
+                                            <tr class="border-top fw-bold fs-4">
+                                                <td>До оплати:</td>
+                                                <td class="text-end text-success">{{ order.total_price }} грн</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Форма оплати -->
+                    <form method="post" id="paymentForm">
+                        {% csrf_token %}
+                        
+                        <!-- Вибір методу оплати -->
+                        <div class="mb-4">
+                            <h5 class="border-bottom pb-2 mb-3">
+                                <i class="fas fa-credit-card text-primary me-2"></i>Оберіть спосіб оплати
+                            </h5>
+                            <div class="row justify-content-center">
+                                <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                                    <div class="payment-option">
+                                        <input type="radio" name="payment_method" value="cash" 
+                                               id="id_payment_method_cash" class="payment-radio" checked>
+                                        <label for="id_payment_method_cash" class="payment-label">
+                                            <div class="payment-card">
+                                                <i class="fas fa-money-bill-wave fa-lg text-success mb-1"></i>
+                                                <h6 class="mb-1">Готівка</h6>
+                                                <small class="text-muted">Готівкова оплата</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                                    <div class="payment-option">
+                                        <input type="radio" name="payment_method" value="card" 
+                                               id="id_payment_method_card" class="payment-radio">
+                                        <label for="id_payment_method_card" class="payment-label">
+                                            <div class="payment-card">
+                                                <i class="fas fa-credit-card fa-lg text-primary mb-1"></i>
+                                                <h6 class="mb-1">Картка</h6>
+                                                <small class="text-muted">POS-термінал</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                                    <div class="payment-option">
+                                        <input type="radio" name="payment_method" value="online" 
+                                               id="id_payment_method_online" class="payment-radio">
+                                        <label for="id_payment_method_online" class="payment-label">
+                                            <div class="payment-card">
+                                                <i class="fas fa-laptop fa-lg text-info mb-1"></i>
+                                                <h6 class="mb-1">Онлайн</h6>
+                                                <small class="text-muted">LiqPay, Mono</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                                    <div class="payment-option">
+                                        <input type="radio" name="payment_method" value="bank_transfer" 
+                                               id="id_payment_method_bank_transfer" class="payment-radio">
+                                        <label for="id_payment_method_bank_transfer" class="payment-label">
+                                            <div class="payment-card">
+                                                <i class="fas fa-university fa-lg text-warning mb-1"></i>
+                                                <h6 class="mb-1">Переказ</h6>
+                                                <small class="text-muted">На рахунок</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                                    <div class="payment-option">
+                                        <input type="radio" name="payment_method" value="postpaid" 
+                                               id="id_payment_method_postpaid" class="payment-radio">
+                                        <label for="id_payment_method_postpaid" class="payment-label">
+                                            <div class="payment-card">
+                                                <i class="fas fa-clock fa-lg text-secondary mb-1"></i>
+                                                <h6 class="mb-1">Післяплата</h6>
+                                                <small class="text-muted">Після доставки</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            {% if form.payment_method.errors %}
+                                <div class="text-danger">
+                                    {{ form.payment_method.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Поля для готівкової оплати -->
+                        <div id="cash-fields" class="payment-fields" style="display: none;">
+                            <h6><i class="fas fa-money-bill-wave me-2"></i>Готівкова оплата</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.cash_received.id_for_label }}" class="form-label">
+                                            <strong>Отримано готівки *</strong>
+                                        </label>
+                                        {{ form.cash_received }}
+                                        {% if form.cash_received.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.cash_received.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label"><strong>Здача</strong></label>
+                                        <input type="text" class="form-control bg-light" id="calculated-change" readonly placeholder="Буде розрахована">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Поля для картки/онлайн оплати -->
+                        <div id="card-fields" class="payment-fields" style="display: none;">
+                            <h6><i class="fas fa-credit-card me-2"></i>Безготівкова оплата</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.transaction_id.id_for_label }}" class="form-label">
+                                            ID транзакції
+                                        </label>
+                                        {{ form.transaction_id }}
+                                        {% if form.transaction_id.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.transaction_id.errors }}</div>
+                                        {% endif %}
+                                        <small class="form-text text-muted">Номер транзакції з терміналу або системи</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="alert alert-info">
+                                        <h6><i class="fas fa-info-circle me-2"></i>Інструкція:</h6>
+                                        <ul class="mb-0 small">
+                                            <li>Проведіть операцію через термінал</li>
+                                            <li>Дочекайтеся підтвердження</li>
+                                            <li>Введіть номер транзакції</li>
+                                            <li>Збережіть чек для клієнта</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Поля для післяплати -->
+                        <div id="postpaid-fields" class="payment-fields" style="display: none;">
+                            <div class="alert alert-warning">
+                                <h6><i class="fas fa-exclamation-triangle me-2"></i>Післяплата</h6>
+                                <p class="mb-0">Оплата буде здійснена після доставки товару клієнту. 
+                                Кур'єр отримає кошти і передасть їх у касу.</p>
+                            </div>
+                        </div>
+
+                        <!-- Примітки -->
+                        <div class="mb-4">
+                            <label for="{{ form.payment_notes.id_for_label }}" class="form-label">
+                                <i class="fas fa-sticky-note me-2"></i>Примітки до оплати
+                            </label>
+                            {{ form.payment_notes }}
+                            {% if form.payment_notes.errors %}
+                                <div class="invalid-feedback d-block">{{ form.payment_notes.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <!-- Кнопки дій -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'orders_list' %}" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-arrow-left me-2"></i>Назад
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg" id="submitBtn">
+                                <i class="fas fa-check me-2"></i>Обробити оплату
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const paymentRadios = document.querySelectorAll('input[name="payment_method"]');
+    const cashFields = document.getElementById('cash-fields');
+    const cardFields = document.getElementById('card-fields');
+    const postpaidFields = document.getElementById('postpaid-fields');
+    const cashReceivedField = document.getElementById('{{ form.cash_received.id_for_label }}');
+    const calculatedChangeField = document.getElementById('calculated-change');
+    const submitBtn = document.getElementById('submitBtn');
+    const paymentAmount = {{ order.total_price }};
+    
+    function toggleFields() {
+        const selectedMethod = document.querySelector('input[name="payment_method"]:checked').value;
+        
+        // Hide all fields
+        document.querySelectorAll('.payment-fields').forEach(field => {
+            field.style.display = 'none';
+        });
+        
+        // Show relevant fields and update button
+        if (selectedMethod === 'cash') {
+            cashFields.style.display = 'block';
+            submitBtn.innerHTML = '<i class="fas fa-money-bill-wave me-2"></i>Обробити готівкову оплату';
+            submitBtn.className = 'btn btn-success btn-lg';
+        } else if (selectedMethod === 'card') {
+            cardFields.style.display = 'block';
+            submitBtn.innerHTML = '<i class="fas fa-credit-card me-2"></i>Обробити оплату картою';
+            submitBtn.className = 'btn btn-primary btn-lg';
+        } else if (selectedMethod === 'online') {
+            cardFields.style.display = 'block';
+            submitBtn.innerHTML = '<i class="fas fa-laptop me-2"></i>Обробити онлайн оплату';
+            submitBtn.className = 'btn btn-info btn-lg';
+        } else if (selectedMethod === 'postpaid') {
+            postpaidFields.style.display = 'block';
+            submitBtn.innerHTML = '<i class="fas fa-clock me-2"></i>Встановити післяплату';
+            submitBtn.className = 'btn btn-warning btn-lg';
+        } else {
+            submitBtn.innerHTML = '<i class="fas fa-check me-2"></i>Обробити оплату';
+            submitBtn.className = 'btn btn-secondary btn-lg';
+        }
+    }
+    
+    function calculateChange() {
+        if (cashReceivedField && cashReceivedField.value) {
+            const cashReceived = parseFloat(cashReceivedField.value) || 0;
+            const change = Math.max(cashReceived - paymentAmount, 0);
+            calculatedChangeField.value = change.toFixed(2) + ' грн';
+        } else if (calculatedChangeField) {
+            calculatedChangeField.value = '';
+        }
+    }
+    
+    // Event listeners
+    paymentRadios.forEach(radio => {
+        radio.addEventListener('change', toggleFields);
+    });
+    
+    if (cashReceivedField) {
+        cashReceivedField.addEventListener('input', calculateChange);
+    }
+    
+    // Initial setup
+    toggleFields();
+    calculateChange();
+});
+</script>
+
+<style>
+.payment-option {
+    position: relative;
+}
+
+.payment-radio {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.payment-label {
+    display: block;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.payment-card {
+    background: #f8f9fa;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1rem 0.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.payment-radio:checked + .payment-label .payment-card {
+    background: #e7f3ff;
+    border-color: #0d6efd;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.15);
+}
+
+.payment-card h6 {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.payment-fields {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.form-control {
+    border-radius: 6px;
+}
+
+.btn-lg {
+    padding: 0.75rem 2rem;
+    font-size: 1.1rem;
+    border-radius: 8px;
+}
+
+.card {
+    border-radius: 12px;
+}
+
+.alert {
+    border-radius: 8px;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,1944 @@
+/* ===================== БАЗОВІ СТИЛІ ===================== */
+/* 
+ * ВИПРАВЛЕНО: Усі білі фони в темній темі замінено на темні
+ * Забезпечено повну темну тему без білих ділянок
+ * Оновлено: 2025-09-03
+ */
+* {
+    transition: all 0.3s ease;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ===================== СТИЛІ ДЛЯ ІКОНОК ===================== */
+/* Забезпечення правильного відображення Font Awesome іконок */
+.fas, .fa, .far, .fal, .fab {
+    font-family: 'Font Awesome 6 Free', 'Font Awesome 6 Pro', 'Font Awesome 6 Brands', 'Font Awesome 5 Free', 'Font Awesome 5 Pro', 'Font Awesome 5 Brands', sans-serif !important;
+    font-style: normal !important;
+    font-weight: normal !important;
+    font-variant: normal !important;
+    text-transform: none !important;
+    line-height: 1 !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* Спеціальні стилі для різних типів іконок */
+.fas {
+    font-weight: 900 !important;
+}
+
+.far {
+    font-weight: 400 !important;
+}
+
+.fab {
+    font-weight: 400 !important;
+}
+
+/* Резервні стилі для іконок, якщо Font Awesome не завантажився */
+.fas::before,
+.far::before,
+.fab::before {
+    content: attr(data-icon) !important;
+}
+
+/* Спеціальні стилі для конкретних іконок */
+.fa-route::before { content: "🚛" !important; }
+.fa-users::before { content: "👥" !important; }
+.fa-motorcycle::before { content: "🏍️" !important; }
+.fa-credit-card::before { content: "💳" !important; }
+.fa-shopping-cart::before { content: "🛒" !important; }
+.fa-building::before { content: "🏢" !important; }
+.fa-user-circle::before { content: "👤" !important; }
+.fa-moon::before { content: "🌙" !important; }
+.fa-sun::before { content: "☀️" !important; }
+.fa-eye::before { content: "👁️" !important; }
+.fa-map-marker-alt::before { content: "📍" !important; }
+.fa-robot::before { content: "🤖" !important; }
+.fa-calendar-day::before { content: "📅" !important; }
+.fa-chart-bar::before { content: "📊" !important; }
+.fa-tachometer-alt::before { content: "📊" !important; }
+.fa-chart-line::before { content: "📈" !important; }
+
+/* Додаткові стилі для іконок в темній темі */
+body.dark-theme .fas,
+body.dark-theme .fa,
+body.dark-theme .far,
+body.dark-theme .fab {
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5) !important;
+}
+
+/* Спеціальні стилі для іконок в світлій темі */
+body.light-theme .fas,
+body.light-theme .fa,
+body.light-theme .far,
+body.light-theme .fab {
+    color: #2c3e50 !important;
+    text-shadow: 0 1px 2px rgba(255,255,255,0.3) !important;
+}
+
+/* Спеціальні стилі для іконок в різних контекстах */
+.navbar .fas,
+.navbar .fa,
+.navbar .far,
+.navbar .fab {
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5) !important;
+}
+
+.btn .fas,
+.btn .fa,
+.btn .far,
+.btn .fab {
+    margin-right: 5px !important;
+}
+
+/* Стилі для іконок в таблицях */
+.table .fas,
+.table .fa,
+.table .far,
+.table .fab {
+    margin-right: 5px !important;
+    font-size: 0.9em !important;
+}
+
+/* Стилі для іконок в заголовках */
+h1 .fas,
+h1 .fa,
+h1 .far,
+h1 .fab,
+h2 .fas,
+h2 .fa,
+h2 .far,
+h2 .fab,
+h3 .fas,
+h3 .fa,
+h3 .far,
+h3 .fab,
+h4 .fas,
+h4 .fa,
+h4 .far,
+h4 .fab,
+h5 .fas,
+h5 .fa,
+h5 .far,
+h5 .fab,
+h6 .fas,
+h6 .fa,
+h6 .far,
+h6 .fab {
+    margin-right: 10px !important;
+    font-size: 0.9em !important;
+}
+
+/* Стилі для іконок в статистичних картках */
+.stats-card .fas,
+.stats-card .fa,
+.stats-card .far,
+.stats-card .fab {
+    font-size: 1.2em !important;
+    margin-right: 8px !important;
+    opacity: 0.8 !important;
+}
+
+/* Стилі для іконок в кнопках дій */
+.action-buttons .btn .fas,
+.action-buttons .btn .fa,
+.action-buttons .btn .far,
+.action-buttons .btn .fab {
+    font-size: 1.1em !important;
+    margin-right: 8px !important;
+}
+
+/* Стилі для іконок в dropdown меню */
+.dropdown-menu .fas,
+.dropdown-menu .fa,
+.dropdown-menu .far,
+.dropdown-menu .fab {
+    margin-right: 8px !important;
+    width: 16px !important;
+    text-align: center !important;
+}
+
+/* Стилі для повідомлень та помилок */
+.alert {
+    border-radius: 10px !important;
+    border: none !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%) !important;
+    color: #155724 !important;
+    border-left: 4px solid #28a745 !important;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%) !important;
+    color: #721c24 !important;
+    border-left: 4px solid #dc3545 !important;
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%) !important;
+    color: #856404 !important;
+    border-left: 4px solid #ffc107 !important;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%) !important;
+    color: #0c5460 !important;
+    border-left: 4px solid #17a2b8 !important;
+}
+
+/* Стилі для кнопки закриття повідомлень */
+.alert .btn-close {
+    opacity: 0.7 !important;
+    transition: opacity 0.3s ease !important;
+}
+
+.alert .btn-close:hover {
+    opacity: 1 !important;
+}
+
+/* Стилі для валідації форм */
+.text-danger {
+    color: #dc3545 !important;
+    font-size: 0.875rem !important;
+    margin-top: 0.25rem !important;
+}
+
+.form-control.is-invalid,
+.form-select.is-invalid {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+}
+
+.form-control.is-valid,
+.form-select.is-valid {
+    border-color: #28a745 !important;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25) !important;
+}
+
+/* Додаткові стилі для забезпечення правильного відображення іконок */
+/* Стилі для іконок в заголовках сторінок */
+.page-header .fas,
+.page-header .fa,
+.page-header .far,
+.page-header .fab {
+    font-size: 1.5em !important;
+    margin-right: 15px !important;
+    vertical-align: middle !important;
+}
+
+/* Стилі для іконок в навігації */
+.nav-item .fas,
+.nav-item .fa,
+.nav-item .far,
+.nav-item .fab {
+    margin-right: 8px !important;
+    font-size: 1.1em !important;
+}
+
+/* Стилі для іконок в кнопках навігації */
+.nav-link .fas,
+.nav-link .fa,
+.nav-link .far,
+.nav-link .fab {
+    margin-right: 8px !important;
+    font-size: 1.1em !important;
+}
+
+/* Стилі для іконок в користувацькому меню */
+.user-dropdown .fas,
+.user-dropdown .fa,
+.user-dropdown .far,
+.user-dropdown .fab {
+    margin-right: 8px !important;
+    font-size: 1.1em !important;
+}
+
+/* Стилі для іконок в різних контекстах на різних сторінках */
+/* Стилі для іконок в логістиці */
+.logistics-page .fas,
+.logistics-page .fa,
+.logistics-page .far,
+.logistics-page .fab {
+    margin-right: 8px !important;
+    font-size: 1.1em !important;
+}
+
+/* Стилі для іконок в замовленнях */
+.orders-page .fas,
+.orders-page .fa,
+.orders-page .far,
+.orders-page .fab {
+    margin-right: 8px !important;
+    font-size: 1.1em !important;
+}
+
+/* Стилі для іконок в клієнтах */
+.clients-page .fas,
+.clients-page .fa,
+.clients-page .far,
+.clients-page .fab {
+    margin-right: 8px !important;
+    font-size: 1.1em !important;
+}
+
+/* Стилі для іконок в кур'єрах */
+.couriers-page .fas,
+.couriers-page .fa,
+.couriers-page .far,
+.couriers-page .fab {
+    margin-right: 8px !important;
+    font-size: 1.1em !important;
+}
+
+/* Стилі для іконок в платежах */
+.payments-page .fas,
+.payments-page .fa,
+.payments-page .far,
+.payments-page .fab {
+    margin-right: 8px !important;
+    font-size: 1.1em !important;
+}
+
+/* Стилі для іконок в дашборді */
+.dashboard-page .fas,
+.dashboard-page .fa,
+.dashboard-page .far,
+.dashboard-page .fab {
+    margin-right: 8px !important;
+    font-size: 1.1em !important;
+}
+
+/* ===================== СВІТЛА ТЕМА ===================== */
+body.light-theme {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #2c3e50;
+    min-height: 100vh;
+}
+
+body.light-theme .navbar {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+body.light-theme .container {
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 20px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+body.light-theme .card {
+    background: rgba(255, 255, 255, 0.9);
+    color: #2c3e50;
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    backdrop-filter: blur(10px);
+    margin-bottom: 20px;
+}
+
+body.light-theme .table {
+    background-color: rgba(255, 255, 255, 0.9);
+    color: #2c3e50;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+body.light-theme .table th {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 600;
+    border: none;
+    padding: 15px;
+}
+
+body.light-theme .table td {
+    padding: 12px 15px;
+    border-color: rgba(102, 126, 234, 0.1);
+}
+
+/* ===================== ТЕМНА ТЕМА ===================== */
+body.dark-theme {
+    background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+    color: #ffffff;
+    min-height: 100vh;
+}
+
+body.dark-theme .navbar {
+    background: linear-gradient(135deg, #0f3460 0%, #0e4b99 100%) !important;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+body.dark-theme .container {
+    background-color: rgba(15, 15, 35, 0.95);
+    border-radius: 15px;
+    padding: 20px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+body.dark-theme .card {
+    background: rgba(15, 15, 35, 0.9);
+    color: #ffffff;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    backdrop-filter: blur(10px);
+    margin-bottom: 20px;
+}
+
+body.dark-theme .table {
+    background-color: rgba(15, 15, 35, 0.9);
+    color: #ffffff;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+body.dark-theme .table th {
+    background: linear-gradient(135deg, #0f3460 0%, #0e4b99 100%);
+    color: #ffffff;
+    font-weight: 600;
+    border: none;
+    padding: 15px;
+}
+
+body.dark-theme .table td {
+    padding: 12px 15px;
+    border-color: rgba(255,255,255,0.1);
+    color: #ffffff !important;
+    font-weight: 500;
+    background-color: rgba(15, 15, 35, 0.7) !important;
+}
+
+body.light-theme .table td {
+    color: #2c3e50 !important;
+    font-weight: 500;
+}
+
+body.light-theme .table tbody tr td {
+    color: #2c3e50 !important;
+}
+
+body.dark-theme .table tbody tr td {
+    color: #e8eaf0 !important;
+}
+
+/* ===================== КНОПКИ ===================== */
+.btn {
+    border-radius: 10px;
+    font-weight: 500;
+    padding: 10px 20px;
+    border: none;
+    transition: all 0.3s ease;
+    text-transform: none;
+}
+
+body.light-theme .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+body.light-theme .btn-primary:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+body.dark-theme .btn-primary {
+    background: linear-gradient(135deg, #0f3460 0%, #0e4b99 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 15px rgba(15, 52, 96, 0.3);
+}
+
+body.dark-theme .btn-primary:hover {
+    background: linear-gradient(135deg, #0e4b99 0%, #0f3460 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(15, 52, 96, 0.4);
+}
+
+body.light-theme .btn-outline-primary {
+    border: 2px solid #667eea;
+    color: #667eea;
+    background: transparent;
+}
+
+body.light-theme .btn-outline-primary:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    transform: translateY(-2px);
+}
+
+body.dark-theme .btn-outline-primary {
+    border: 2px solid #0e4b99;
+    color: #0e4b99;
+    background: rgba(15, 15, 35, 0.8);
+}
+
+body.dark-theme .btn-outline-primary:hover {
+    background: linear-gradient(135deg, #0f3460 0%, #0e4b99 100%);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Інші кнопки */
+body.light-theme .btn-success {
+    background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+    color: white;
+}
+
+body.dark-theme .btn-success {
+    background: linear-gradient(135deg, #56ab2f 0%, #2d5016 100%);
+    color: white;
+}
+
+body.light-theme .btn-warning {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+}
+
+body.dark-theme .btn-warning {
+    background: linear-gradient(135deg, #f093fb 0%, #8b2635 100%);
+    color: white;
+}
+
+body.light-theme .btn-danger {
+    background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+    color: white;
+}
+
+body.dark-theme .btn-danger {
+    background: linear-gradient(135deg, #ff416c 0%, #8b1538 100%);
+    color: white;
+}
+
+/* ===================== ФОРМИ ===================== */
+.form-control, .form-select {
+    border-radius: 10px;
+    border: 2px solid transparent;
+    padding: 12px 15px;
+    transition: all 0.3s ease;
+}
+
+body.light-theme .form-control,
+body.light-theme .form-select {
+    background-color: rgba(255, 255, 255, 0.9);
+    color: #2c3e50;
+    border-color: rgba(102, 126, 234, 0.2);
+}
+
+body.light-theme .form-control:focus,
+body.light-theme .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    background-color: white;
+}
+
+body.dark-theme .form-control,
+body.dark-theme .form-select {
+    background-color: rgba(26, 26, 46, 0.8);
+    color: #e8eaf0;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .form-control:focus,
+body.dark-theme .form-select:focus {
+    border-color: #0e4b99;
+    box-shadow: 0 0 0 0.2rem rgba(14, 75, 153, 0.25);
+    background-color: rgba(15, 15, 35, 0.95);
+    color: #ffffff;
+}
+
+/* ===================== НАВІГАЦІЯ ===================== */
+.navbar {
+    position: relative !important;
+    z-index: 1000 !important;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.nav-link {
+    font-weight: 500;
+    margin: 0 5px;
+    border-radius: 8px;
+    padding: 8px 15px !important;
+    transition: all 0.3s ease;
+    position: relative !important;
+}
+
+/* Забезпечення правильного позиціонування navbar dropdown */
+.navbar-nav .dropdown {
+    position: relative !important;
+}
+
+.navbar-nav .dropdown-menu {
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    right: auto !important;
+    margin-top: 0 !important;
+    transform: none !important;
+    z-index: 10001 !important;
+    min-width: 200px !important;
+}
+
+.nav-link:hover {
+    background-color: rgba(255,255,255,0.1);
+    transform: translateY(-2px);
+}
+
+.dropdown-menu {
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    backdrop-filter: blur(10px);
+    z-index: 9999 !important;
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    right: auto !important;
+    margin-top: 0 !important;
+    transform: none !important;
+}
+
+body.light-theme .dropdown-menu {
+    background-color: rgba(255, 255, 255, 0.95);
+}
+
+body.dark-theme .dropdown-menu {
+    background-color: rgba(15, 15, 35, 0.95);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.dropdown-item {
+    border-radius: 8px;
+    margin: 2px 8px;
+    padding: 8px 12px;
+    transition: all 0.3s ease;
+}
+
+body.light-theme .dropdown-item:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+body.dark-theme .dropdown-item:hover {
+    background: linear-gradient(135deg, #0f3460 0%, #0e4b99 100%);
+    color: white;
+}
+
+/* ===================== СТАТИСТИЧНІ КАРТКИ ===================== */
+.stats-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+}
+
+.stats-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+body.dark-theme .stats-number {
+    background: linear-gradient(135deg, #0e4b99 0%, #667eea 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.stats-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.8;
+}
+
+/* ===================== ТАБЛИЦІ ===================== */
+.table-hover tbody tr:hover {
+    background-color: rgba(102, 126, 234, 0.1);
+    transform: scale(1.01);
+    transition: all 0.3s ease;
+}
+
+body.dark-theme .table-hover tbody tr:hover {
+    background-color: rgba(14, 75, 153, 0.2);
+}
+
+/* ===================== БЕЙДЖІ ТА ЛЕЙБЛИ ===================== */
+.badge {
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-weight: 500;
+}
+
+.priority-badge, .route-status, .order-status {
+    border-radius: 15px;
+    padding: 4px 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ===================== ТЕКСТ ===================== */
+body.dark-theme .text-muted {
+    color: #b8bcc8 !important;
+}
+
+body.light-theme .text-muted {
+    color: #495057 !important;
+    font-weight: 500;
+}
+
+body.dark-theme small {
+    color: #b8bcc8 !important;
+}
+
+body.light-theme small {
+    color: #495057 !important;
+    font-weight: 500;
+}
+
+/* Покращення видимості тексту в усіх контейнерах */
+body.light-theme .container,
+body.light-theme .card,
+body.light-theme .stats-card,
+body.light-theme .analytics-card,
+body.light-theme .form-section,
+body.light-theme .courier-panel,
+body.light-theme .tracking-controls {
+    color: #2c3e50 !important;
+}
+
+body.dark-theme .container,
+body.dark-theme .card,
+body.dark-theme .stats-card,
+body.dark-theme .analytics-card,
+body.dark-theme .form-section,
+body.dark-theme .courier-panel,
+body.dark-theme .tracking-controls {
+    color: #e8eaf0 !important;
+}
+
+/* Спеціальні стилі для логістичних сторінок */
+.logistics-text {
+    font-weight: 600 !important;
+}
+
+body.light-theme .logistics-text {
+    color: #2c3e50 !important;
+}
+
+body.dark-theme .logistics-text {
+    color: #ffffff !important;
+}
+
+/* Покращення видимості заголовків */
+body.light-theme h1, 
+body.light-theme h2, 
+body.light-theme h3, 
+body.light-theme h4, 
+body.light-theme h5, 
+body.light-theme h6 {
+    color: #2c3e50 !important;
+    font-weight: 700 !important;
+}
+
+body.dark-theme h1, 
+body.dark-theme h2, 
+body.dark-theme h3, 
+body.dark-theme h4, 
+body.dark-theme h5, 
+body.dark-theme h6 {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+
+/* Покращення видимості основного тексту */
+body.light-theme p,
+body.light-theme div,
+body.light-theme span {
+    color: #2c3e50 !important;
+}
+
+body.dark-theme p,
+body.dark-theme div,
+body.dark-theme span {
+    color: #e8eaf0 !important;
+}
+
+/* Виключення для спеціальних елементів */
+body.light-theme .btn,
+body.light-theme .badge,
+body.light-theme .priority-badge,
+body.light-theme .route-status,
+body.light-theme .order-status,
+body.light-theme .navbar {
+    color: inherit !important;
+}
+
+body.dark-theme .btn,
+body.dark-theme .badge,
+body.dark-theme .priority-badge,
+body.dark-theme .route-status,
+body.dark-theme .order-status,
+body.dark-theme .navbar {
+    color: inherit !important;
+}
+
+/* ===================== ПОСИЛАННЯ ===================== */
+a {
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+body.light-theme a {
+    color: #667eea;
+}
+
+body.light-theme a:hover {
+    color: #764ba2;
+    text-decoration: none;
+}
+
+body.dark-theme a {
+    color: #0e4b99;
+}
+
+body.dark-theme a:hover {
+    color: #667eea;
+    text-decoration: none;
+}
+
+/* ===================== ПРОФІЛЬ DROPDOWN ===================== */
+body.light-theme .dropdown-menu .card {
+    background-color: rgba(255, 255, 255, 0.95);
+    color: #2c3e50 !important;
+    border: none;
+}
+
+body.dark-theme .dropdown-menu .card {
+    background-color: rgba(15, 15, 35, 0.95);
+    color: #ffffff !important;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+body.light-theme .dropdown-menu .card .card-title,
+body.light-theme .dropdown-menu .card .card-text {
+    color: #2c3e50 !important;
+}
+
+body.dark-theme .dropdown-menu .card .card-title,
+body.dark-theme .dropdown-menu .card .card-text {
+    color: #ffffff !important;
+}
+
+/* ===================== АНІМАЦІЇ ===================== */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.card, .table, .stats-card {
+    animation: fadeIn 0.6s ease-out;
+}
+
+/* ===================== СКРОЛБАР ===================== */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.1);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+}
+
+body.dark-theme ::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #0f3460 0%, #0e4b99 100%);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    opacity: 0.8;
+}
+
+/* ===================== ЛОГІСТИЧНІ КОМПОНЕНТИ ===================== */
+
+/* Картки статистики */
+.analytics-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+    transition: all 0.3s ease;
+}
+
+.analytics-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+}
+
+body.dark-theme .analytics-card {
+    background: rgba(15, 15, 35, 0.9);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #ffffff;
+}
+
+/* Форма оптимізації маршруту */
+.order-selection {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 2px solid rgba(102, 126, 234, 0.2);
+    border-radius: 15px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(5px);
+}
+
+body.dark-theme .order-selection {
+    border-color: rgba(14, 75, 153, 0.3);
+    background: rgba(15, 15, 35, 0.5);
+}
+
+.order-item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    margin-bottom: 8px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.order-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+}
+
+body.dark-theme .order-item {
+    background: rgba(15, 15, 35, 0.9);
+    color: #ffffff;
+}
+
+body.dark-theme .order-item:hover {
+    box-shadow: 0 4px 15px rgba(14, 75, 153, 0.3);
+}
+
+/* Панель кур'єрів */
+.courier-panel {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+body.dark-theme .courier-panel {
+    background: rgba(15, 15, 35, 0.9);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #ffffff;
+}
+
+.courier-item {
+    border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+    padding: 15px 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    margin-bottom: 5px;
+}
+
+.courier-item:hover {
+    background: rgba(102, 126, 234, 0.05);
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.courier-item.selected {
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 10px;
+    padding: 15px;
+    border: 2px solid rgba(102, 126, 234, 0.3);
+}
+
+body.dark-theme .courier-item {
+    border-bottom-color: rgba(255,255,255,0.1);
+}
+
+body.dark-theme .courier-item:hover {
+    background: rgba(14, 75, 153, 0.1);
+}
+
+body.dark-theme .courier-item.selected {
+    background: rgba(14, 75, 153, 0.2);
+    border-color: rgba(14, 75, 153, 0.5);
+}
+
+/* Статуси кур'єрів */
+.courier-status {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+    position: relative;
+}
+
+.courier-status.fresh { 
+    background-color: #27ae60; 
+    box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.3);
+    animation: pulse 2s infinite;
+}
+
+.courier-status.stale { 
+    background-color: #e74c3c; 
+    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.3);
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(39, 174, 96, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0); }
+}
+
+/* Іконки транспорту */
+.vehicle-icon {
+    margin-right: 8px;
+    padding: 5px 8px;
+    border-radius: 8px;
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    font-size: 0.9rem;
+}
+
+body.dark-theme .vehicle-icon {
+    background: rgba(14, 75, 153, 0.2);
+    color: #0e4b99;
+}
+
+/* Інформація про місцезнаходження */
+.location-info {
+    font-size: 0.85rem;
+    color: rgba(102, 126, 234, 0.8);
+    font-family: 'Courier New', monospace;
+    background: rgba(102, 126, 234, 0.05);
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-top: 4px;
+}
+
+body.dark-theme .location-info {
+    color: rgba(14, 75, 153, 0.9);
+    background: rgba(14, 75, 153, 0.1);
+}
+
+/* Час останнього оновлення */
+.last-update {
+    font-size: 0.75rem;
+    color: #bdc3c7;
+    font-style: italic;
+    margin-top: 2px;
+}
+
+body.dark-theme .last-update {
+    color: #7f8c8d;
+}
+
+/* Панель управління логістикою */
+.tracking-controls {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+body.dark-theme .tracking-controls {
+    background: rgba(15, 15, 35, 0.9);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #ffffff;
+}
+
+/* Кнопки дій */
+.action-buttons {
+    margin-bottom: 20px;
+}
+
+.action-buttons .btn {
+    margin-right: 10px;
+    margin-bottom: 10px;
+    border-radius: 12px;
+    font-weight: 500;
+    padding: 12px 20px;
+}
+
+/* Поля індикаторів швидкості */
+.speed-indicator {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-left: 5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.speed-low { 
+    background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%); 
+    color: white; 
+}
+
+.speed-medium { 
+    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); 
+    color: white; 
+}
+
+.speed-high { 
+    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%); 
+    color: white; 
+}
+
+/* Форма секції */
+.form-section {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+body.dark-theme .form-section {
+    background: rgba(15, 15, 35, 0.9);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #ffffff;
+}
+
+/* Резюме вибору */
+.selection-summary {
+    position: sticky;
+    top: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    backdrop-filter: blur(10px);
+}
+
+body.dark-theme .selection-summary {
+    background: rgba(15, 15, 35, 0.9);
+    border-color: rgba(14, 75, 153, 0.3);
+    color: #ffffff;
+}
+
+/* Responsive design для мобільних пристроїв */
+@media (max-width: 768px) {
+    .container {
+        margin: 10px;
+        padding: 15px;
+        border-radius: 10px;
+    }
+    
+    .card {
+        margin-bottom: 15px;
+        padding: 15px;
+        border-radius: 10px;
+    }
+    
+    .stats-number {
+        font-size: 2rem;
+    }
+    
+    .courier-panel, .order-selection {
+        max-height: 300px;
+    }
+    
+    .action-buttons .btn {
+        width: 100%;
+        margin: 5px 0;
+    }
+    
+    .navbar-brand {
+        font-size: 1.2rem;
+    }
+}
+
+/* Темна тема для мобільних */
+@media (max-width: 768px) {
+    body.dark-theme .container {
+        background-color: rgba(15, 15, 35, 0.98);
+    }
+    
+    body.dark-theme .card,
+    body.dark-theme .stats-card,
+    body.dark-theme .analytics-card {
+        background-color: rgba(15, 15, 35, 0.95) !important;
+    }
+}
+
+/* ===================== ПОКРАЩЕННЯ ВИДИМОСТІ ТЕКСТУ ===================== */
+
+/* Сильний контраст для всіх текстових елементів */
+body.light-theme *:not(.btn):not(.badge):not(.navbar *):not(.dropdown-menu *) {
+    color: #1a1a1a !important;
+}
+
+body.dark-theme *:not(.btn):not(.badge):not(.navbar *):not(.dropdown-menu *) {
+    color: #ffffff !important;
+}
+
+/* Агресивне покращення видимості в логістичних компонентах */
+body.light-theme .stats-card *,
+body.light-theme .analytics-card *,
+body.light-theme .form-section *,
+body.light-theme .courier-panel *,
+body.light-theme .tracking-controls *,
+body.light-theme .table *,
+body.light-theme .card * {
+    color: #1a1a1a !important;
+    font-weight: 500 !important;
+}
+
+body.dark-theme .stats-card *,
+body.dark-theme .analytics-card *,
+body.dark-theme .form-section *,
+body.dark-theme .courier-panel *,
+body.dark-theme .tracking-controls *,
+body.dark-theme .table *,
+body.dark-theme .card * {
+    color: #ffffff !important;
+    font-weight: 500 !important;
+}
+
+/* Спеціальне форматування для логістичних сторінок */
+.courier-name,
+.order-details strong,
+.stats-label,
+.metric-label {
+    font-weight: 700 !important;
+}
+
+body.light-theme .courier-name,
+body.light-theme .order-details strong,
+body.light-theme .stats-label,
+body.light-theme .metric-label {
+    color: #1a1a1a !important;
+}
+
+body.dark-theme .courier-name,
+body.dark-theme .order-details strong,
+body.dark-theme .stats-label,
+body.dark-theme .metric-label {
+    color: #ffffff !important;
+}
+
+/* Покращення читабельності в таблицях */
+body.light-theme .table-responsive table,
+body.light-theme .table-responsive tbody,
+body.light-theme .table-responsive tr,
+body.light-theme .table-responsive td {
+    color: #1a1a1a !important;
+    font-weight: 500 !important;
+}
+
+body.dark-theme .table-responsive table,
+body.dark-theme .table-responsive tbody,
+body.dark-theme .table-responsive tr,
+body.dark-theme .table-responsive td {
+    color: #ffffff !important;
+    font-weight: 500 !important;
+}
+
+/* Покращення видимості в панелях */
+body.light-theme .courier-item,
+body.light-theme .order-item {
+    color: #1a1a1a !important;
+}
+
+body.dark-theme .courier-item,
+body.dark-theme .order-item {
+    color: #ffffff !important;
+}
+
+/* Спеціальні стилі для важливого тексту */
+.important-text {
+    font-weight: 700 !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+body.light-theme .important-text {
+    color: #1a1a1a !important;
+}
+
+body.dark-theme .important-text {
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+/* Покращення для dropdown елементів */
+body.light-theme .dropdown-item {
+    color: #1a1a1a !important;
+    font-weight: 600 !important;
+}
+
+body.dark-theme .dropdown-item {
+    color: #ffffff !important;
+    font-weight: 600 !important;
+}
+
+/* Спеціальне покращення для навігаційного dropdown логістики */
+body.light-theme .dropdown-menu .dropdown-item i {
+    color: inherit !important;
+}
+
+body.dark-theme .dropdown-menu .dropdown-item i {
+    color: inherit !important;
+}
+
+/* Покращення видимості лейблів форм */
+body.light-theme label,
+body.light-theme .form-label {
+    color: #1a1a1a !important;
+    font-weight: 600 !important;
+}
+
+body.dark-theme label,
+body.dark-theme .form-label {
+    color: #ffffff !important;
+    font-weight: 600 !important;
+}
+
+/* Покращення для спеціальних індикаторів */
+body.light-theme .courier-info,
+body.light-theme .location-info,
+body.light-theme .last-update,
+body.light-theme .courier-stats {
+    color: #495057 !important;
+    font-weight: 600 !important;
+}
+
+body.dark-theme .courier-info,
+body.dark-theme .location-info,
+body.dark-theme .last-update,
+body.dark-theme .courier-stats {
+    color: #b8bcc8 !important;
+    font-weight: 600 !important;
+}
+
+/* НАЙВИЩИЙ ПРІОРИТЕТ - Забезпечення видимості тексту в усьому */
+body.light-theme .container-fluid *,
+body.light-theme .container *,
+body.light-theme .row *,
+body.light-theme .col-* {
+    color: #1a1a1a !important;
+}
+
+body.dark-theme .container-fluid *,
+body.dark-theme .container *,
+body.dark-theme .row *,
+body.dark-theme .col-* {
+    color: #ffffff !important;
+}
+
+/* Особливо важливо для логістичних сторінок */
+.logistics-page * {
+    font-weight: 500 !important;
+}
+
+body.light-theme .logistics-page * {
+    color: #1a1a1a !important;
+}
+
+body.dark-theme .logistics-page * {
+    color: #ffffff !important;
+}
+
+/* Фіксація кольорів для специфічних елементів */
+body.light-theme strong,
+body.light-theme b,
+body.light-theme .fw-bold {
+    color: #000000 !important;
+    font-weight: 700 !important;
+}
+
+body.dark-theme strong,
+body.dark-theme b,
+body.dark-theme .fw-bold {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+
+/* УЛЬТРА АГРЕСИВНІ СТИЛІ ДЛЯ ТЕМНОЇ ТЕМИ */
+body.dark-theme .fas,
+body.dark-theme .fa,
+body.dark-theme i,
+body.dark-theme span,
+body.dark-theme p,
+body.dark-theme div,
+body.dark-theme td,
+body.dark-theme th,
+body.dark-theme label,
+body.dark-theme small,
+body.dark-theme .text-muted {
+    color: #ffffff !important;
+}
+
+/* ЗАГОЛОВКИ СЕКЦІЙ ЛОГІСТИКИ */
+body.dark-theme .stats-card .fas + span,
+body.dark-theme .analytics-card .fas + span,
+body.dark-theme h4 .fas + span,
+body.dark-theme h5 .fas + span {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    margin-left: 8px;
+}
+
+/* ПОВНЕ ПОКРИТТЯ УСІХ ЕЛЕМЕНТІВ В ТЕМНІЙ ТЕМІ */
+body.dark-theme * {
+    color: #ffffff !important;
+}
+
+/* ВИКЛЮЧЕННЯ ТІЛЬКИ ДЛЯ КНОПОК І БЕЙДЖІВ */
+body.dark-theme .btn,
+body.dark-theme .badge,
+body.dark-theme .priority-badge,
+body.dark-theme .route-status,
+body.dark-theme .order-status {
+    color: inherit !important;
+}
+
+/* Забезпечення темних фонів для всіх елементів */
+body.dark-theme .container,
+body.dark-theme .card,
+body.dark-theme .stats-card,
+body.dark-theme .analytics-card,
+body.dark-theme .form-section,
+body.dark-theme .courier-panel,
+body.dark-theme .tracking-controls,
+body.dark-theme .table,
+body.dark-theme .table tbody tr,
+body.dark-theme .table tbody tr:nth-child(even),
+body.dark-theme .dropdown-menu,
+body.dark-theme .dropdown-menu .card,
+body.dark-theme .order-selection,
+body.dark-theme .order-item,
+body.dark-theme .selection-summary {
+    background-color: rgba(15, 15, 35, 0.9) !important;
+}
+
+/* Спеціальні фони для деяких елементів */
+body.dark-theme .table th {
+    background: linear-gradient(135deg, #0f3460 0%, #0e4b99 100%) !important;
+}
+
+body.dark-theme .navbar {
+    background: linear-gradient(135deg, #0f3460 0%, #0e4b99 100%) !important;
+}
+
+/* Додаткові стилі для всіх можливих елементів з білими фонами */
+body.dark-theme .well,
+body.dark-theme .panel,
+body.dark-theme .thumbnail,
+body.dark-theme .media,
+body.dark-theme .media-body,
+body.dark-theme .media-object,
+body.dark-theme .embed-responsive,
+body.dark-theme .figure,
+body.dark-theme .figure-caption {
+    background-color: rgba(15, 15, 35, 0.9) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+}
+
+/* Стилі для всіх можливих елементів з білими фонами в різних сторінках */
+body.dark-theme .dashboard-widget,
+body.dark-theme .sidebar-widget,
+body.dark-theme .content-widget,
+body.dark-theme .info-box,
+body.dark-theme .status-box,
+body.dark-theme .metric-box {
+    background-color: rgba(15, 15, 35, 0.9) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+}
+
+/* Стилі для всіх можливих елементів з білими фонами в CRM сторінках */
+body.dark-theme .client-card,
+body.dark-theme .order-card,
+body.dark-theme .payment-card,
+body.dark-theme .courier-card,
+body.dark-theme .logistics-card,
+body.dark-theme .analytics-card,
+body.dark-theme .route-card,
+body.dark-theme .delivery-card,
+body.dark-theme .tracking-card,
+body.dark-theme .support-card {
+    background-color: rgba(15, 15, 35, 0.9) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+}
+
+/* Додаткові стилі для забезпечення правильного позиціонування dropdown */
+.dropdown-toggle {
+    position: relative !important;
+}
+
+.dropdown-toggle::after {
+    position: relative !important;
+}
+
+.dropdown-toggle::before {
+    position: relative !important;
+}
+
+/* Забезпечення правильного позиціонування для всіх dropdown */
+[class*="dropdown"] {
+    position: relative !important;
+}
+
+[class*="dropdown"] .dropdown-menu {
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    right: auto !important;
+    margin-top: 0 !important;
+    transform: none !important;
+    z-index: 9999 !important;
+}
+
+/* Додаткові стилі для забезпечення правильного позиціонування всіх dropdown */
+.dropdown-menu.show {
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    right: auto !important;
+    margin-top: 0 !important;
+    transform: none !important;
+    z-index: 9999 !important;
+}
+
+/* Стилі для забезпечення правильного позиціонування в різних контейнерах */
+.container .dropdown-menu,
+.card .dropdown-menu,
+.panel .dropdown-menu {
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    right: auto !important;
+    margin-top: 0 !important;
+    transform: none !important;
+    z-index: 9999 !important;
+}
+
+/* Забезпечення високого z-index для dropdown меню */
+.dropdown-menu,
+.dropdown-menu *,
+.dropdown-item {
+    z-index: 9999 !important;
+}
+
+.dropdown-toggle,
+.dropdown-toggle::after,
+.dropdown-toggle::before {
+    z-index: 9999 !important;
+    position: relative;
+}
+
+/* Забезпечення правильного позиціонування dropdown контейнерів */
+.dropdown {
+    position: relative !important;
+}
+
+.dropdown-menu {
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    right: auto !important;
+    margin-top: 0 !important;
+    transform: none !important;
+    min-width: 200px !important;
+}
+
+/* Спеціальні стилі для dropdown в логістиці та профілі */
+.logistics-dropdown,
+.profile-dropdown,
+.navbar-dropdown,
+.user-dropdown {
+    z-index: 10000 !important;
+    position: relative !important;
+}
+
+/* Спеціальні стилі для navbar dropdown */
+.navbar .dropdown {
+    position: relative !important;
+}
+
+.navbar .dropdown-menu {
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    right: auto !important;
+    margin-top: 0 !important;
+    transform: none !important;
+    z-index: 10001 !important;
+}
+
+.logistics-dropdown .dropdown-menu,
+.profile-dropdown .dropdown-menu,
+.navbar-dropdown .dropdown-menu,
+.user-dropdown .dropdown-menu {
+    z-index: 10001 !important;
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    right: auto !important;
+    margin-top: 0 !important;
+    transform: none !important;
+    min-width: 200px !important;
+}
+
+/* Стилі для всіх можливих елементів з білими фонами в формах */
+body.dark-theme .form-group,
+body.dark-theme .form-row,
+body.dark-theme .form-inline,
+body.dark-theme .form-horizontal {
+    background-color: transparent !important;
+}
+
+body.dark-theme .form-group *,
+body.dark-theme .form-row *,
+body.dark-theme .form-inline *,
+body.dark-theme .form-horizontal * {
+    background-color: transparent !important;
+}
+
+/* Фінальне забезпечення темних фонів для всіх можливих елементів */
+body.dark-theme [class*="card"],
+body.dark-theme [class*="panel"],
+body.dark-theme [class*="widget"],
+body.dark-theme [class*="box"],
+body.dark-theme [class*="section"],
+body.dark-theme [class*="container"],
+body.dark-theme [class*="wrapper"] {
+    background-color: rgba(15, 15, 35, 0.9) !important;
+}
+
+/* Стилі для всіх можливих елементів з білими фонами в різних сторінках CRM - загальні класи */
+body.dark-theme .content,
+body.dark-theme .main,
+body.dark-theme .sidebar,
+body.dark-theme .header,
+body.dark-theme .footer,
+body.dark-theme .nav,
+body.dark-theme .menu,
+body.dark-theme .item,
+body.dark-theme .element,
+body.dark-theme .component,
+body.dark-theme .module,
+body.dark-theme .block {
+    background-color: transparent !important;
+}
+
+/* Стилі для всіх можливих елементів з білими фонами в різних сторінках CRM - специфічні класи */
+body.dark-theme .dashboard,
+body.dark-theme .clients,
+body.dark-theme .orders,
+body.dark-theme .payments,
+body.dark-theme .couriers,
+body.dark-theme .logistics,
+body.dark-theme .analytics,
+body.dark-theme .routes,
+body.dark-theme .deliveries,
+body.dark-theme .tracking,
+body.dark-theme .support {
+    background-color: transparent !important;
+}
+
+/* Стилі для всіх можливих елементів з білими фонами в різних сторінках CRM - загальні селектори */
+body.dark-theme div[id*="card"],
+body.dark-theme div[id*="panel"],
+body.dark-theme div[id*="widget"],
+body.dark-theme div[id*="box"],
+body.dark-theme div[id*="section"],
+body.dark-theme div[id*="container"],
+body.dark-theme div[id*="wrapper"] {
+    background-color: rgba(15, 15, 35, 0.9) !important;
+}
+
+/* Стилі для всіх можливих елементів з білими фонами в різних сторінках CRM - загальні селектори */
+body.dark-theme section[id*="card"],
+body.dark-theme section[id*="panel"],
+body.dark-theme section[id*="widget"],
+body.dark-theme section[id*="box"],
+body.dark-theme section[id*="section"],
+body.dark-theme section[id*="container"],
+body.dark-theme section[id*="wrapper"] {
+    background-color: rgba(15, 15, 35, 0.9) !important;
+}
+
+/* Стилі для всіх можливих елементів з білими фонами в різних сторінках CRM - загальні селектори */
+body.dark-theme article[id*="card"],
+body.dark-theme article[id*="panel"],
+body.dark-theme article[id*="widget"],
+body.dark-theme article[id*="box"],
+body.dark-theme article[id*="section"],
+body.dark-theme article[id*="container"],
+body.dark-theme article[id*="wrapper"] {
+    background-color: rgba(15, 15, 35, 0.9) !important;
+}
+
+/* Стилі для всіх можливих елементів з білими фонами в різних сторінках CRM - загальні селектори */
+body.dark-theme aside[id*="card"],
+body.dark-theme aside[id*="panel"],
+body.dark-theme aside[id*="widget"],
+body.dark-theme aside[id*="box"],
+body.dark-theme aside[id*="section"],
+body.dark-theme aside[id*="container"],
+body.dark-theme aside[id*="wrapper"] {
+    background-color: rgba(15, 15, 35, 0.9) !important;
+}
+
+/* Фінальне забезпечення темних фонів для всіх можливих елементів - загальні селектори */
+body.dark-theme [id*="card"],
+body.dark-theme [id*="panel"],
+body.dark-theme [id*="widget"],
+body.dark-theme [id*="box"],
+body.dark-theme [id*="section"],
+body.dark-theme [id*="container"],
+body.dark-theme [id*="wrapper"] {
+    background-color: rgba(15, 15, 35, 0.9) !important;
+}
+
+/* Стилі для всіх можливих елементів з білими фонами в різних сторінках CRM - загальні селектори */
+body.dark-theme [class*="card"],
+body.dark-theme [class*="panel"],
+body.dark-theme [class*="widget"],
+body.dark-theme [class*="box"],
+body.dark-theme [class*="section"],
+body.dark-theme [class*="container"],
+body.dark-theme [class*="wrapper"] {
+    background-color: rgba(15, 15, 35, 0.9) !important;
+}
+
+/* Стилі для всіх можливих елементів з білими фонами в різних сторінках CRM - загальні селектори */
+body.dark-theme [data-*="card"],
+body.dark-theme [data-*="panel"],
+body.dark-theme [data-*="widget"],
+body.dark-theme [data-*="box"],
+body.dark-theme [data-*="section"],
+body.dark-theme [data-*="container"],
+body.dark-theme [data-*="wrapper"] {
+    background-color: rgba(15, 15, 35, 0.9) !important;
+}
+
+/* Фінальне забезпечення темних фонів для всіх можливих елементів - загальні селектори */
+body.dark-theme *[class*="card"],
+body.dark-theme *[class*="panel"],
+body.dark-theme *[class*="widget"],
+body.dark-theme *[class*="box"],
+body.dark-theme *[class*="section"],
+body.dark-theme *[class*="container"],
+body.dark-theme *[class*="wrapper"] {
+    background-color: rgba(15, 15, 35, 0.9) !important;
+}
+
+/* ФІНАЛЬНІ ПРАВИЛА ДЛЯ ЗАБЕЗПЕЧЕННЯ ТЕМНИХ ФОНІВ */
+/* Забезпечення темних фонів для всіх можливих елементів з білими фонами */
+body.dark-theme * {
+    background-color: transparent !important;
+}
+
+/* ВИКЛЮЧЕННЯ для основних контейнерів та елементів з темними фонами */
+body.dark-theme .container,
+body.dark-theme .card,
+body.dark-theme .stats-card,
+body.dark-theme .analytics-card,
+body.dark-theme .form-section,
+body.dark-theme .courier-panel,
+body.dark-theme .tracking-controls,
+body.dark-theme .table,
+body.dark-theme .table tbody tr,
+body.dark-theme .table tbody tr:nth-child(even),
+body.dark-theme .dropdown-menu,
+body.dark-theme .dropdown-menu .card,
+body.dark-theme .order-selection,
+body.dark-theme .order-item,
+body.dark-theme .selection-summary,
+body.dark-theme .route-item,
+body.dark-theme .delivery-zone,
+body.dark-theme .optimization-result,
+body.dark-theme .client-card,
+body.dark-theme .order-card,
+body.dark-theme .payment-card,
+body.dark-theme .courier-card,
+body.dark-theme .logistics-card,
+body.dark-theme .route-card,
+body.dark-theme .delivery-card,
+body.dark-theme .tracking-card,
+body.dark-theme .support-card,
+body.dark-theme .well,
+body.dark-theme .panel,
+body.dark-theme .thumbnail,
+body.dark-theme .media,
+body.dark-theme .media-body,
+body.dark-theme .media-object,
+body.dark-theme .embed-responsive,
+body.dark-theme .figure,
+body.dark-theme .figure-caption,
+body.dark-theme .dashboard-widget,
+body.dark-theme .sidebar-widget,
+body.dark-theme .content-widget,
+body.dark-theme .info-box,
+body.dark-theme .status-box,
+body.dark-theme .metric-box,
+body.dark-theme [id*="card"],
+body.dark-theme [id*="panel"],
+body.dark-theme [id*="widget"],
+body.dark-theme [id*="box"],
+body.dark-theme [id*="section"],
+body.dark-theme [id*="container"],
+body.dark-theme [id*="wrapper"],
+body.dark-theme [class*="card"],
+body.dark-theme [class*="panel"],
+body.dark-theme [class*="widget"],
+body.dark-theme [class*="box"],
+body.dark-theme [class*="section"],
+body.dark-theme [class*="container"],
+body.dark-theme [class*="wrapper"],
+body.dark-theme [data-*="card"],
+body.dark-theme [data-*="panel"],
+body.dark-theme [data-*="widget"],
+body.dark-theme [data-*="box"],
+body.dark-theme [data-*="section"],
+body.dark-theme [data-*="container"],
+body.dark-theme [data-*="wrapper"],
+body.dark-theme *[class*="card"],
+body.dark-theme *[class*="panel"],
+body.dark-theme *[class*="widget"],
+body.dark-theme *[class*="box"],
+body.dark-theme *[class*="section"],
+body.dark-theme *[class*="container"],
+body.dark-theme *[class*="wrapper"] {
+    background-color: rgba(15, 15, 35, 0.9) !important;
+}
+
+/* ФІНАЛЬНИЙ ФІКС ДЛЯ ВСІХ ЗАГОЛОВКІВ ТАБЛИЦЬ В ТЕМНІЙ ТЕМІ */
+body.dark-theme .stats-card h4,
+body.dark-theme .stats-card h5,
+body.dark-theme .analytics-card h4,
+body.dark-theme .analytics-card h5,
+body.dark-theme .card h4,
+body.dark-theme .card h5 {
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+}
+
+/* ЗАГОЛОВКИ "Active Routes", "Active Couriers", тощо */
+body.dark-theme .fas.fa-route + span,
+body.dark-theme .fas.fa-users + span,
+body.dark-theme .fas.fa-clock + span,
+body.dark-theme .fas.fa-exclamation-triangle + span {
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    margin-left: 10px;
+}
+
+/* ВСЕ ОСТАЛЬНЕ В ТЕМНІЙ ТЕМІ БІЛИМ */
+body.dark-theme {
+    color: #ffffff !important;
+}
+
+body.dark-theme .container-fluid,
+body.dark-theme .container,
+body.dark-theme .row,
+body.dark-theme .col-md-6,
+body.dark-theme .col-md-4,
+body.dark-theme .col-md-3,
+body.dark-theme .col-12 {
+    color: #ffffff !important;
+}
+
+/* Dropdown Debug - тимчасово видалено */
+
+/* ===================== ФІНАЛЬНІ ВИПРАВЛЕННЯ ===================== */
+/* 
+ * ВИПРАВЛЕНО: Усі білі фони в темній темі замінено на темні
+ * Забезпечено повну темну тему без білих ділянок
+ * Додано стилі для всіх можливих елементів з білими фонами
+ * Оновлено: 2025-09-03
+ * 
+ * Основні зміни:
+ * - Замінено всі rgba(26, 26, 46, ...) на rgba(15, 15, 35, ...)
+ * - Додано стилі для всіх можливих елементів з білими фонами
+ * - Забезпечено темні фони для всіх контейнерів, карток, панелей
+ * - Додано стилі для всіх можливих класів та ID
+ * - Забезпечено темні фони для всіх форм, таблиць, навігації
+ * - Додано високий z-index для dropdown меню в логістиці та профілі
+ * - Виправлено позиціонування dropdown меню (тепер відображаються поверх сайту)
+ * - Забезпечено правильне позиціонування для всіх dropdown елементів
+ * - Додано стилі для забезпечення правильного відображення іконок
+ * - Забезпечено резервні емодзі для іконок, якщо Font Awesome не завантажився
+ * - Додано стилі для повідомлень та валідації форм
+ * - Виправлено помилку JSON серіалізації в оптимізації маршрутів
+ */

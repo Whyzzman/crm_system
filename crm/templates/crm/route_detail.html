@@ -1,0 +1,902 @@
+{% extends 'crm/base.html' %}
+{% load static %}
+
+{% block title %}Маршрут: {{ route.name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+#routeMap {
+    height: 600px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.route-info {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.route-status {
+    padding: 5px 12px;
+    border-radius: 5px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+}
+
+.route-status.planned { background-color: #f39c12; color: white; }
+.route-status.active { background-color: #27ae60; color: white; }
+.route-status.completed { background-color: #95a5a6; color: white; }
+.route-status.cancelled { background-color: #e74c3c; color: white; }
+
+.route-metrics {
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.metric {
+    flex: 1;
+}
+
+.metric-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.metric-label {
+    color: #7f8c8d;
+    font-size: 0.9rem;
+}
+
+.order-sequence {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.order-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    margin-bottom: 10px;
+    border: 1px solid #eee;
+    border-radius: 5px;
+    background: #f8f9fa;
+    transition: all 0.2s;
+}
+
+.order-item:hover {
+    background: #e3f2fd;
+    cursor: pointer;
+}
+
+.order-item.completed {
+    background: #d4edda;
+    border-color: #c3e6cb;
+}
+
+.sequence-number {
+    background: #007bff;
+    color: white;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+.sequence-number.completed {
+    background: #28a745;
+}
+
+.order-details {
+    flex-grow: 1;
+}
+
+.order-status {
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.order-status.new { background-color: #6c757d; color: white; }
+.order-status.assigned { background-color: #007bff; color: white; }
+.order-status.picked_up { background-color: #fd7e14; color: white; }
+.order-status.in_transit { background-color: #20c997; color: white; }
+.order-status.delivered { background-color: #28a745; color: white; }
+.order-status.cancelled { background-color: #dc3545; color: white; }
+
+.priority-badge {
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    margin-left: 5px;
+}
+
+.priority-badge.urgent { background-color: #e74c3c; color: white; }
+.priority-badge.high { background-color: #f39c12; color: white; }
+.priority-badge.normal { background-color: #3498db; color: white; }
+.priority-badge.low { background-color: #95a5a6; color: white; }
+
+.route-actions {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.legend {
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    font-size: 0.9rem;
+    border: 1px solid rgba(0,0,0,0.15);
+    backdrop-filter: blur(8px);
+    min-width: 180px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+    color: #333;
+    font-weight: 500;
+}
+
+.legend-item:last-child {
+    margin-bottom: 0;
+}
+
+.legend-info {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(0,0,0,0.1);
+}
+
+.legend strong {
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: block;
+    text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+    .legend {
+        background: rgba(40, 44, 52, 0.98);
+        border-color: rgba(255,255,255,0.2);
+        color: #e6e6e6;
+    }
+    
+    .legend strong {
+        color: #ffffff;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+    }
+    
+    .legend-item {
+        color: #e6e6e6;
+    }
+}
+
+/* Enhanced visibility for different map types */
+.legend {
+    /* Ensure good contrast on all map backgrounds */
+    text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.legend-item {
+    /* Better text contrast */
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+/* Additional map type support */
+.legend {
+    /* Better visibility on satellite and dark maps */
+    background: rgba(255, 255, 255, 0.98);
+    border: 2px solid rgba(0,0,0,0.2);
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .legend {
+        background: #ffffff;
+        border: 3px solid #000000;
+        color: #000000;
+    }
+    
+    .legend strong {
+        color: #000000;
+        text-shadow: none;
+    }
+    
+    .legend-item {
+        color: #000000;
+        text-shadow: none;
+    }
+}
+
+.legend-line {
+    width: 20px;
+    height: 3px;
+    margin-right: 8px;
+    border-radius: 2px;
+}
+
+.legend-marker {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid logistics-page">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1><i class="fas fa-route"></i> {{ route.name }}</h1>
+                <div>
+                    <a href="{% url 'logistics_dashboard' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Повернутись до Панелі
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Route Information -->
+    <div class="route-info">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="d-flex align-items-center mb-3">
+                    <h4 class="mb-0 mr-3">Деталі Маршруту</h4>
+                    <span class="route-status {{ route.status }}">{{ route.get_status_display }}</span>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Кур'єр:</strong> {{ route.courier.name }}</p>
+                        <p><strong>Транспорт:</strong> {{ route.courier.get_vehicle_type_display }}</p>
+                        <p><strong>Телефон:</strong> {{ route.courier.phone }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Створено:</strong> {{ route.created_at|date:"d.m.Y H:i" }}</p>
+                        {% if route.started_at %}
+                            <p><strong>Почато:</strong> {{ route.started_at|date:"d.m.Y H:i" }}</p>
+                        {% endif %}
+                        {% if route.completed_at %}
+                            <p><strong>Завершено:</strong> {{ route.completed_at|date:"d.m.Y H:i" }}</p>
+                        {% endif %}
+                        <p><strong>Тип Маршруту:</strong> 
+                            {% if route.route_data.coordinates|length > route.order_count|add:1 %}
+                                <span class="badge badge-success">Реальний Маршрут</span>
+                            {% else %}
+                                <span class="badge badge-warning">Прямий Маршрут</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="route-metrics">
+                    <div class="metric">
+                        <div class="metric-value">{{ route.order_count }}</div>
+                        <div class="metric-label">Замовлення</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">
+                            {% if route.total_distance %}
+                                {{ route.total_distance|floatformat:1 }}km
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </div>
+                        <div class="metric-label">Відстань</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">
+                            {% if route.estimated_duration %}
+                                {{ route.estimated_duration_formatted }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </div>
+                        <div class="metric-label">Орієнт. Час</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Route Actions -->
+    {% if user.is_staff or user.is_superuser %}
+    <div class="route-actions">
+        <h5><i class="fas fa-cogs"></i> Дії з Маршрутом</h5>
+        <div class="btn-group" role="group">
+            {% if route.status == 'planned' %}
+                <button class="btn btn-success" onclick="updateRouteStatus('active')">
+                    <i class="fas fa-play"></i> Почати Маршрут
+                </button>
+            {% elif route.status == 'active' %}
+                <button class="btn btn-warning" onclick="updateRouteStatus('completed')">
+                    <i class="fas fa-check"></i> Завершити Маршрут
+                </button>
+            {% endif %}
+            <button class="btn btn-info" onclick="centerMapOnRoute()">
+                <i class="fas fa-search"></i> Центрувати Карту
+            </button>
+            <button class="btn btn-outline-secondary" onclick="toggleWaypoints()">
+                <i class="fas fa-map-marker-alt"></i> <span id="waypointToggleText">Приховати Маршрутні Точки</span>
+            </button>
+            <div class="btn-group" role="group">
+                <button class="btn btn-secondary" onclick="exportRoute('json')">
+                    <i class="fas fa-download"></i> Експорт JSON
+                </button>
+                <button class="btn btn-outline-secondary" onclick="exportRoute('csv')">
+                    <i class="fas fa-table"></i> Експорт CSV
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <!-- Order Sequence -->
+        <div class="col-md-4">
+            <div class="order-sequence">
+                <h5><i class="fas fa-list-ol"></i> Послідовність Доставки</h5>
+                
+                {% for route_order in route_orders %}
+                <div class="order-item {% if route_order.order.status == 'delivered' %}completed{% endif %}" 
+                     data-order-id="{{ route_order.order.id }}"
+                     data-latitude="{{ route_order.order.latitude }}"
+                     data-longitude="{{ route_order.order.longitude }}">
+                    
+                    <div class="sequence-number {% if route_order.order.status == 'delivered' %}completed{% endif %}">
+                        {{ route_order.sequence }}
+                    </div>
+                    
+                    <div class="order-details">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <strong>Замовлення №{{ route_order.order.id }}</strong>
+                                <span class="order-status {{ route_order.order.status }}">
+                                    {{ route_order.order.get_status_display }}
+                                </span>
+                                <span class="priority-badge {{ route_order.order.priority }}">
+                                    {{ route_order.order.get_priority_display }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-1">
+                            <strong>{{ route_order.order.client.name }}</strong><br>
+                            <small class="text-muted">{{ route_order.order.address }}</small>
+                        </div>
+                        
+                        {% if route_order.estimated_arrival %}
+                        <div class="mt-1">
+                            <small class="text-info">
+                                <i class="fas fa-clock"></i> Орієнт.: {{ route_order.estimated_arrival|date:"H:i" }}
+                            </small>
+                        </div>
+                        {% endif %}
+                        
+                        {% if route_order.actual_arrival %}
+                        <div class="mt-1">
+                            <small class="text-success">
+                                <i class="fas fa-check"></i> Прибув: {{ route_order.actual_arrival|date:"H:i" }}
+                            </small>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center text-muted py-4">
+                    <i class="fas fa-inbox fa-2x mb-2"></i>
+                    <p>Немає замовлень у цьому маршруті</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Map -->
+        <div class="col-md-8">
+            <div id="routeMap" style="position: relative;">
+                <div class="legend">
+                    <strong>Легенда</strong>
+                    <div class="legend-item">
+                        <div class="legend-line" style="background-color: #007bff;"></div>
+                        Реальний маршрут
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-marker" style="background-color: #28a745;"></div>
+                        Початкова точка
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-marker" style="background-color: #dc3545;"></div>
+                        Точка доставки
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-marker" style="background-color: #ffc107; border: 2px solid #fff;"></div>
+                        Поточне місце кур'єра
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-marker" style="background-color: #6c757d; border: 2px solid #fff; opacity: 0.7;"></div>
+                        Ключові точки
+                    </div>
+                    <div class="legend-info">
+                        <small style="color: #6c757d; font-style: italic;">
+                            Показ оптимізованих точок для кращої видимості
+                        </small>
+                        <div style="margin-top: 5px;">
+                            <small style="color: #6c757d;">
+                                Маршрут: <span id="routePointsCount">0</span> координат
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+let map;
+let routePolyline;
+let orderMarkers = [];
+let waypointMarkers = [];
+let showWaypoints = true;
+let mapData = {{ map_data|safe }};
+console.log('🗺️ Map data loaded:', mapData);
+console.log('Route coordinates count:', mapData.route_coordinates ? mapData.route_coordinates.length : 0);
+console.log('Orders count:', mapData.orders ? mapData.orders.length : 0);
+
+// GPS distance calculation function (Haversine formula)
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Earth's radius in kilometers
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+}
+
+// Initialize map
+function initMap() {
+    console.log('🚀 Initializing map...');
+    console.log('Map container element:', document.getElementById('routeMap'));
+    console.log('Leaflet available:', typeof L !== 'undefined');
+    
+    try {
+        // Default to Lviv coordinates (more relevant for this demo)
+        map = L.map('routeMap').setView([49.8397, 24.0297], 12);
+        console.log('✅ Map object created');
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        console.log('✅ Tile layer added');
+
+        // Draw route
+        drawRoute();
+        console.log('✅ Map initialization completed');
+        
+    } catch (error) {
+        console.error('❌ Map initialization failed:', error);
+        const mapContainer = document.getElementById('routeMap');
+        if (mapContainer) {
+            mapContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: red;">❌ Помилка ініціалізації карти: ' + error.message + '</div>';
+        }
+    }
+}
+
+// Draw route on map
+function drawRoute() {
+    console.log('🎨 Drawing route...');
+    console.log('Route coordinates:', mapData.route_coordinates);
+    console.log('Orders to display:', mapData.orders);
+    
+    if (!mapData.route_coordinates || mapData.route_coordinates.length === 0) {
+        console.warn('⚠️ No route coordinates available');
+        return;
+    }
+    
+    if (!mapData.orders || mapData.orders.length === 0) {
+        console.warn('⚠️ No orders to display');
+        return;
+    }
+    
+    // Clear existing markers and polylines
+    orderMarkers.forEach(marker => map.removeLayer(marker));
+    orderMarkers = [];
+    waypointMarkers.forEach(marker => map.removeLayer(marker));
+    waypointMarkers = [];
+    if (routePolyline) map.removeLayer(routePolyline);
+
+    // Draw route path if available
+    if (mapData.route_coordinates && mapData.route_coordinates.length > 0) {
+        // Check if we have real road route or just waypoints
+        const hasRealRoute = mapData.route_coordinates.length > mapData.orders.length + 1;
+        
+        if (hasRealRoute) {
+            // Real road route with many coordinate points
+            routePolyline = L.polyline(mapData.route_coordinates, {
+                color: '#007bff',
+                weight: 4,
+                opacity: 0.8,
+                smoothFactor: 1
+            }).addTo(map);
+        } else {
+            // Simple waypoints - draw straight lines but indicate it's not a real route
+            routePolyline = L.polyline(mapData.route_coordinates, {
+                color: '#6c757d',
+                weight: 3,
+                opacity: 0.6,
+                dashArray: '10, 5'
+            }).addTo(map);
+            
+            // Add info popup about route type
+            const routeInfo = L.popup()
+                .setLatLng(mapData.route_coordinates[0])
+                .setContent(`
+                    <div style="text-align: center;">
+                                                                <strong>Тип Маршруту</strong><br>
+                                        <small>Прямий маршрут (немає реальних даних доріг)</small><br>
+                                        <small>Розгляньте додавання OpenRouteService API ключа для реальних маршрутів</small>
+                    </div>
+                `);
+            routeInfo.openOn(map);
+        }
+        
+        // Fit map to route
+        map.fitBounds(routePolyline.getBounds(), { padding: [20, 20] });
+        
+        // Update route points count
+        const pointsCountElement = document.getElementById('routePointsCount');
+        if (pointsCountElement) {
+            pointsCountElement.textContent = mapData.route_coordinates.length;
+        }
+    }
+
+    // Add order markers
+    mapData.orders.forEach((order, index) => {
+        console.log('Processing order:', order);
+        
+        if (order.latitude && order.longitude) {
+            // Determine marker color based on status
+            let markerColor = '#dc3545'; // Default red for delivery points
+            if (index === 0) markerColor = '#28a745'; // Green for start point
+            
+            // Create custom icon
+            const icon = L.divIcon({
+                html: `<div style="background-color: ${markerColor}; color: white; width: 30px; height: 30px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">${order.sequence}</div>`,
+                iconSize: [30, 30],
+                iconAnchor: [15, 15],
+                className: 'order-marker'
+            });
+            
+            // Create marker
+            const marker = L.marker([order.latitude, order.longitude], { icon: icon }).addTo(map);
+            
+            // Create popup content
+            const popupContent = `
+                <div class="order-popup">
+                                                            <strong>Зупинка ${order.sequence}: Замовлення №${order.id}</strong><br>
+                    <i class="fas fa-user"></i> ${order.client_name}<br>
+                    <i class="fas fa-map-marker-alt"></i> ${order.address}<br>
+                    <i class="fas fa-info-circle"></i> ${order.status}<br>
+                    ${order.estimated_arrival ? `<i class="fas fa-clock"></i> Est: ${order.estimated_arrival}` : ''}
+                </div>
+            `;
+            
+            marker.bindPopup(popupContent);
+            orderMarkers.push(marker);
+            
+            // Add click event to highlight order in sequence
+            marker.on('click', function() {
+                console.log('Marker clicked for order:', order.id);
+                highlightOrderInSequence(order.id);
+            });
+        } else {
+            console.warn('Order missing coordinates:', order);
+        }
+    });
+
+    // Add waypoint markers for route visualization (only key points)
+    if (mapData.route_coordinates && mapData.route_coordinates.length > 0) {
+        const totalPoints = mapData.route_coordinates.length;
+        
+        // Only show waypoints if we have a reasonable number of coordinates
+        if (totalPoints > 10) {
+            // Show only key waypoints (every 20th point for long routes)
+            const step = Math.max(1, Math.floor(totalPoints / 20));
+            
+            for (let i = step; i < totalPoints - step; i += step) {
+                const coord = mapData.route_coordinates[i];
+                
+                // Skip if this is too close to start/end points
+                const startCoord = mapData.route_coordinates[0];
+                const endCoord = mapData.route_coordinates[totalPoints - 1];
+                
+                const distToStart = calculateDistance(
+                    coord[0], coord[1], startCoord[0], startCoord[1]
+                );
+                const distToEnd = calculateDistance(
+                    coord[0], coord[1], endCoord[0], endCoord[1]
+                );
+                
+                // Only show waypoint if it's not too close to start/end
+                if (distToStart > 0.1 && distToEnd > 0.1) {
+                    const waypointIcon = L.divIcon({
+                        html: '<div style="background-color: #6c757d; width: 6px; height: 6px; border-radius: 50%; border: 1px solid white; opacity: 0.7;"></div>',
+                        iconSize: [6, 6],
+                        iconAnchor: [3, 3],
+                        className: 'waypoint-marker'
+                    });
+                    
+                    const waypointMarker = L.marker(coord, { icon: waypointIcon });
+                    if (showWaypoints) {
+                        waypointMarker.addTo(map);
+                    }
+                    waypointMarkers.push(waypointMarker);
+                }
+            }
+        } else {
+            // For short routes, show all waypoints
+            mapData.route_coordinates.forEach((coord, index) => {
+                if (index > 0 && index < mapData.route_coordinates.length - 1) {
+                    const waypointIcon = L.divIcon({
+                        html: '<div style="background-color: #6c757d; width: 8px; height: 8px; border-radius: 50%; border: 2px solid white;"></div>',
+                        iconSize: [8, 8],
+                        iconAnchor: [4, 4],
+                        className: 'waypoint-marker'
+                    });
+                    
+                    const waypointMarker = L.marker(coord, { icon: waypointIcon });
+                    if (showWaypoints) {
+                        waypointMarker.addTo(map);
+                    }
+                    waypointMarkers.push(waypointMarker);
+                }
+            });
+        }
+    }
+
+    // Add courier current location if available
+    {% if route.courier.current_latitude and route.courier.current_longitude %}
+    const courierIcon = L.divIcon({
+        html: '<div style="background-color: #ffc107; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>',
+        iconSize: [20, 20],
+        iconAnchor: [10, 10],
+        className: 'courier-marker'
+    });
+    
+    L.marker([{{ route.courier.current_latitude }}, {{ route.courier.current_longitude }}], { 
+        icon: courierIcon 
+    }).addTo(map).bindPopup(`
+        <strong>{{ route.courier.name }}</strong><br>
+                                                Поточне місцезнаходження
+    `);
+    {% endif %}
+}
+
+// Highlight order in sequence
+function highlightOrderInSequence(orderId) {
+    console.log('Highlighting order:', orderId);
+    
+    // Remove previous highlights
+    document.querySelectorAll('.order-item').forEach(item => {
+        item.style.border = '1px solid #eee';
+    });
+    
+    // Highlight selected order
+    const orderItem = document.querySelector(`[data-order-id="${orderId}"]`);
+    if (orderItem) {
+        orderItem.style.border = '2px solid #007bff';
+        orderItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        console.log('Order highlighted successfully');
+    } else {
+        console.warn(`Order item with ID ${orderId} not found`);
+        console.log('Available order items:', document.querySelectorAll('.order-item'));
+    }
+}
+
+// Center map on route
+function centerMapOnRoute() {
+    if (routePolyline) {
+        map.fitBounds(routePolyline.getBounds(), { padding: [20, 20] });
+    }
+}
+
+// Update route status
+function updateRouteStatus(newStatus) {
+    if (confirm(`Ви впевнені, що хочете ${newStatus} цей маршрут?`)) {
+        // This would typically make an AJAX request to update the status
+        alert(`Статус маршруту буде оновлено на: ${newStatus}`);
+        // location.reload();
+    }
+}
+
+// Toggle waypoints visibility
+function toggleWaypoints() {
+    showWaypoints = !showWaypoints;
+    const toggleText = document.getElementById('waypointToggleText');
+    
+    waypointMarkers.forEach(marker => {
+        if (showWaypoints) {
+            marker.addTo(map);
+            toggleText.textContent = 'Приховати Маршрутні Точки';
+        } else {
+            marker.removeFrom(map);
+            toggleText.textContent = 'Показати Маршрутні Точки';
+        }
+    });
+}
+
+// Export route in different formats
+function exportRoute(format = 'json') {
+    try {
+        const timestamp = new Date().toISOString().split('T')[0];
+        const filename = `route_{{ route.id }}_{{ route.name|slugify }}_${timestamp}`;
+        
+        if (format === 'json') {
+            exportRouteAsJSON(filename);
+        } else if (format === 'csv') {
+            exportRouteAsCSV(filename);
+        }
+        
+    } catch (error) {
+        console.error('Помилка експорту маршруту:', error);
+        alert('Помилка при експорті маршруту. Будь ласка, спробуйте ще раз.');
+    }
+}
+
+// Export route as JSON
+function exportRouteAsJSON(filename) {
+    const routeData = {
+        route_id: {{ route.id }},
+        route_name: "{{ route.name|escapejs }}",
+        courier: "{{ route.courier.name|escapejs }}",
+        courier_phone: "{{ route.courier.phone }}",
+        vehicle_type: "{{ route.courier.get_vehicle_type_display }}",
+        status: "{{ route.status }}",
+        status_display: "{{ route.get_status_display }}",
+        created_at: "{{ route.created_at|date:'Y-m-d H:i:s' }}",
+        {% if route.started_at %}started_at: "{{ route.started_at|date:'Y-m-d H:i:s' }}",{% endif %}
+        {% if route.completed_at %}completed_at: "{{ route.completed_at|date:'Y-m-d H:i:s' }}",{% endif %}
+        total_distance: {{ route.total_distance|default:"null" }},
+        estimated_duration: "{{ route.estimated_duration|default:'' }}",
+        order_count: {{ route.order_count }},
+        orders: mapData.orders,
+        coordinates: mapData.route_coordinates,
+        export_timestamp: new Date().toISOString(),
+        export_format: "JSON"
+    };
+    
+    const dataStr = JSON.stringify(routeData, null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    
+    downloadFile(dataBlob, `${filename}.json`);
+    alert('JSON маршрут успішно експортовано!');
+}
+
+// Export route as CSV
+function exportRouteAsCSV(filename) {
+    let csvContent = "";
+    
+    // Route header info
+    csvContent += "ІНФОРМАЦІЯ ПРО МАРШРУТ\n";
+    csvContent += `ID Маршруту,{{ route.id }}\n`;
+    csvContent += `Назва,"{{ route.name|escapejs }}"\n`;
+    csvContent += `Кур'єр,"{{ route.courier.name|escapejs }}"\n`;
+    csvContent += `Телефон,{{ route.courier.phone }}\n`;
+    csvContent += `Транспорт,"{{ route.courier.get_vehicle_type_display }}"\n`;
+    csvContent += `Статус,"{{ route.get_status_display }}"\n`;
+    csvContent += `Створено,"{{ route.created_at|date:'Y-m-d H:i:s' }}"\n`;
+    {% if route.started_at %}csvContent += `Почато,"{{ route.started_at|date:'Y-m-d H:i:s' }}"\n`;{% endif %}
+    {% if route.completed_at %}csvContent += `Завершено,"{{ route.completed_at|date:'Y-m-d H:i:s' }}"\n`;{% endif %}
+    csvContent += `Відстань,{{ route.total_distance|default:"N/A" }} км\n`;
+    csvContent += `Кількість замовлень,{{ route.order_count }}\n`;
+    csvContent += "\n";
+    
+    // Orders table
+    csvContent += "ЗАМОВЛЕННЯ В МАРШРУТІ\n";
+    csvContent += "Послідовність,ID Замовлення,Клієнт,Адреса,Статус,Пріоритет,Орієнтовний час,Широта,Довгота\n";
+    
+    mapData.orders.forEach(order => {
+        csvContent += `${order.sequence},${order.id},"${order.client_name}","${order.address}","${order.status}","${order.priority}","${order.estimated_arrival || 'N/A'}",${order.latitude || 'N/A'},${order.longitude || 'N/A'}\n`;
+    });
+    
+    // Route coordinates (sample)
+    if (mapData.route_coordinates && mapData.route_coordinates.length > 0) {
+        csvContent += "\nКООРДИНАТИ МАРШРУТУ (ЗРАЗОК)\n";
+        csvContent += "Широта,Довгота\n";
+        
+        // Export every 10th coordinate to keep file manageable
+        const step = Math.max(1, Math.floor(mapData.route_coordinates.length / 50));
+        for (let i = 0; i < mapData.route_coordinates.length; i += step) {
+            const coord = mapData.route_coordinates[i];
+            csvContent += `${coord[0]},${coord[1]}\n`;
+        }
+    }
+    
+    const dataBlob = new Blob([csvContent], {type: 'text/csv;charset=utf-8;'});
+    downloadFile(dataBlob, `${filename}.csv`);
+    alert('CSV маршрут успішно експортовано!');
+}
+
+// Helper function to download file
+function downloadFile(blob, filename) {
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    
+    // Add the link to DOM temporarily to ensure it works in all browsers
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Clean up
+    setTimeout(() => URL.revokeObjectURL(link.href), 100);
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing map...');
+    initMap();
+    
+    // Order item clicks
+    document.querySelectorAll('.order-item').forEach(item => {
+        item.addEventListener('click', function() {
+            const latitude = parseFloat(this.dataset.latitude);
+            const longitude = parseFloat(this.dataset.longitude);
+            const orderId = this.dataset.orderId;
+            
+            console.log('Order item clicked:', { orderId, latitude, longitude });
+            
+            if (latitude && longitude) {
+                map.setView([latitude, longitude], 16);
+                highlightOrderInSequence(orderId);
+            } else {
+                console.warn('Order item missing coordinates:', { orderId, latitude, longitude });
+            }
+        });
+    });
+    
+    console.log('Event listeners attached');
+});
+</script>
+{% endblock %}

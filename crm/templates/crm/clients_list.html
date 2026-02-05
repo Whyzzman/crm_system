@@ -1,0 +1,40 @@
+{% extends "crm/base.html" %}
+
+{% block title %}Список клієнтів{% endblock %}
+
+{% block content %}
+
+<h2>Список клієнтів</h2>
+<form method="get" class="mb-3">
+  <input type="text" name="q" value="{{ search_query }}" placeholder="Пошук по імені" class="form-control">
+</form>
+
+{% if user.is_authenticated %}
+<table class="table table-striped table-hover">
+  <thead class="table-dark">
+    <tr>
+      <th>ID</th>
+      <th>Ім’я</th>
+      <th>Телефон</th>
+      <th>Адреса</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for client in clients %}
+    <tr>
+      <td>{{ client.id }}</td>
+      <td>{{ client.name }}</td>
+      <td>{{ client.phone }}</td>
+      <td>{{ client.address }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="4" class="text-center">Немає клієнтів</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>Увійдіть, щоб переглянути список клієнтів</p>
+{% endif %}
+{% endblock %}

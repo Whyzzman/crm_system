@@ -1,0 +1,240 @@
+{% extends 'crm/base.html' %}
+
+{% block title %}Платіж #{{ payment.id }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-credit-card me-2"></i>Платіж #{{ payment.id }}</h2>
+                <div>
+                    <a href="{% url 'payments_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Назад до списку
+                    </a>
+                    {% if payment.status == 'pending' %}
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'payment_quick' order.id %}" class="btn btn-success">
+                                <i class="fas fa-bolt"></i> Швидка оплата
+                            </a>
+                            <a href="{% url 'payment_process' payment.id %}" class="btn btn-outline-success">
+                                <i class="fas fa-check"></i> Детальна обробка
+                            </a>
+                        </div>
+                    {% endif %}
+                    {% if payment.status == 'completed' and user.is_superuser %}
+                        <a href="{% url 'payment_refund' payment.id %}" class="btn btn-warning">
+                            <i class="fas fa-undo"></i> Повернути
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Інформація про платіж -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-info-circle me-2"></i>Деталі платежу</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-borderless">
+                                <tbody>
+                                    <tr>
+                                        <th class="w-40">ID платежу:</th>
+                                        <td>#{{ payment.id }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Статус:</th>
+                                        <td>
+                                            {% if payment.status == 'completed' %}
+                                                <span class="badge bg-success fs-6">{{ payment.get_status_display }}</span>
+                                            {% elif payment.status == 'pending' %}
+                                                <span class="badge bg-warning fs-6">{{ payment.get_status_display }}</span>
+                                            {% elif payment.status == 'failed' %}
+                                                <span class="badge bg-danger fs-6">{{ payment.get_status_display }}</span>
+                                            {% elif payment.status == 'refunded' %}
+                                                <span class="badge bg-info fs-6">{{ payment.get_status_display }}</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary fs-6">{{ payment.get_status_display }}</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Спосіб оплати:</th>
+                                        <td>
+                                            <span class="badge bg-secondary">{{ payment.get_method_display }}</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Сума:</th>
+                                        <td><strong class="fs-5">{{ payment.amount }} грн</strong></td>
+                                    </tr>
+                                    {% if payment.is_cash_payment and payment.cash_received %}
+                                    <tr>
+                                        <th>Отримано готівки:</th>
+                                        <td>{{ payment.cash_received }} грн</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Здача:</th>
+                                        <td>
+                                            {% if payment.change_amount %}
+                                                <strong class="text-info">{{ payment.change_amount }} грн</strong>
+                                            {% else %}
+                                                0 грн
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if payment.transaction_id %}
+                                    <tr>
+                                        <th>ID транзакції:</th>
+                                        <td><code>{{ payment.transaction_id }}</code></td>
+                                    </tr>
+                                    {% endif %}
+                                    <tr>
+                                        <th>Створено:</th>
+                                        <td>{{ payment.created_at|date:"d.m.Y H:i:s" }}</td>
+                                    </tr>
+                                    {% if payment.processed_at %}
+                                    <tr>
+                                        <th>Оброблено:</th>
+                                        <td>{{ payment.processed_at|date:"d.m.Y H:i:s" }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if payment.processed_by %}
+                                    <tr>
+                                        <th>Оброблено користувачем:</th>
+                                        <td>{{ payment.processed_by.username }}</td>
+                                    </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                            
+                            {% if payment.payment_notes %}
+                            <div class="mt-3">
+                                <h6>Примітки:</h6>
+                                <div class="border rounded p-2 bg-light">
+                                    {{ payment.payment_notes|linebreaks }}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Інформація про замовлення -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-shopping-cart me-2"></i>Інформація про замовлення</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-borderless">
+                                <tbody>
+                                    <tr>
+                                        <th class="w-40">ID замовлення:</th>
+                                        <td>
+                                            <a href="{% url 'order_update' order.id %}" class="text-decoration-none">
+                                                #{{ order.id }}
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Клієнт:</th>
+                                        <td>{{ order.client.name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Телефон:</th>
+                                        <td>{{ order.client.phone }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Товар:</th>
+                                        <td>{{ order.product }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Кількість:</th>
+                                        <td>{{ order.quantity }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Адреса доставки:</th>
+                                        <td>{{ order.address }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Статус замовлення:</th>
+                                        <td>
+                                            <span class="badge bg-info">{{ order.get_status_display }}</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Пріоритет:</th>
+                                        <td>
+                                            {% if order.priority == 'urgent' %}
+                                                <span class="badge bg-danger">{{ order.get_priority_display }}</span>
+                                            {% elif order.priority == 'high' %}
+                                                <span class="badge bg-warning">{{ order.get_priority_display }}</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ order.get_priority_display }}</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% if order.courier %}
+                                    <tr>
+                                        <th>Кур'єр:</th>
+                                        <td>{{ order.courier.name }}</td>
+                                    </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+
+                            <!-- Розбивка ціни -->
+                            <div class="mt-3">
+                                <h6>Розбивка ціни:</h6>
+                                <table class="table table-sm">
+                                    <tbody>
+                                        <tr>
+                                            <td>Базова ціна:</td>
+                                            <td class="text-end">{{ order.base_price }} грн</td>
+                                        </tr>
+                                        {% if order.additional_fees > 0 %}
+                                        <tr>
+                                            <td>Додаткові послуги:</td>
+                                            <td class="text-end">{{ order.additional_fees }} грн</td>
+                                        </tr>
+                                        {% endif %}
+                                        {% if order.discount > 0 %}
+                                        <tr class="text-success">
+                                            <td>Знижка:</td>
+                                            <td class="text-end">-{{ order.discount }} грн</td>
+                                        </tr>
+                                        {% endif %}
+                                        <tr class="table-active fw-bold">
+                                            <td>Загальна сума:</td>
+                                            <td class="text-end">{{ order.total_price }} грн</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if payment.gateway_response %}
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-server me-2"></i>Відповідь платіжного шлюзу</h5>
+                        </div>
+                        <div class="card-body">
+                            <pre class="bg-light p-3 rounded"><code>{{ payment.gateway_response|pprint }}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

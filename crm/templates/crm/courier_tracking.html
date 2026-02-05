@@ -1,0 +1,430 @@
+{% extends 'crm/base.html' %}
+{% load static %}
+
+{% block title %}Відстеження GPS Кур'єрів{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+#trackingMap {
+    height: 500px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.courier-panel {
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.courier-item {
+    border-bottom: 1px solid #eee;
+    padding: 15px 0;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.courier-item:hover {
+    background-color: #f8f9fa;
+}
+
+.courier-item:last-child {
+    border-bottom: none;
+}
+
+.courier-item.selected {
+    background-color: #e3f2fd;
+    border-radius: 5px;
+    padding: 15px;
+}
+
+.courier-status {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.courier-status.fresh { 
+    background-color: #27ae60; 
+    box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.3);
+}
+
+.courier-status.stale { 
+    background-color: #e74c3c; 
+    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.3);
+}
+
+.vehicle-icon {
+    margin-right: 5px;
+    color: #7f8c8d;
+}
+
+.location-info {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+    margin-top: 5px;
+}
+
+.last-update {
+    font-size: 0.8rem;
+    color: #bdc3c7;
+}
+
+.tracking-controls {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.legend {
+    background: white;
+    border-radius: 5px;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    font-size: 0.9rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.legend-item:last-child {
+    margin-bottom: 0;
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.speed-indicator {
+    font-size: 0.8rem;
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-left: 5px;
+}
+
+.speed-low { background-color: #95a5a6; color: white; }
+.speed-medium { background-color: #f39c12; color: white; }
+.speed-high { background-color: #27ae60; color: white; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid logistics-page">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1><i class="fas fa-map-marker-alt"></i> Відстеження GPS Кур'єрів</h1>
+                <a href="{% url 'logistics_dashboard' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Повернутись до Панелі
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="tracking-controls">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <div class="form-group mb-0">
+                    <label for="autoRefresh" class="mr-3">
+                        <input type="checkbox" id="autoRefresh" checked> Авто-оновлення (30с)
+                    </label>
+                    <button id="refreshBtn" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-sync-alt"></i> Оновити Зараз
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-6 text-right">
+                <small class="text-muted">
+                    Останнє оновлення: <span id="lastUpdated">{{ "now"|date:"H:i:s" }}</span>
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Courier List -->
+        <div class="col-md-4">
+            <div class="courier-panel">
+                <h5><i class="fas fa-users"></i> Активні Кур'єри ({{ active_couriers.count }})</h5>
+                
+                {% for courier in active_couriers %}
+                <div class="courier-item" data-courier-id="{{ courier.id }}">
+                    <div class="d-flex align-items-center">
+                        <span class="courier-status {% if courier.is_location_fresh %}fresh{% else %}stale{% endif %}"></span>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <strong>{{ courier.name }}</strong>
+                                <span class="vehicle-icon">
+                                    {% if courier.vehicle_type == 'bike' %}
+                                        <i class="fas fa-bicycle"></i>
+                                    {% elif courier.vehicle_type == 'motorcycle' %}
+                                        <i class="fas fa-motorcycle"></i>
+                                    {% elif courier.vehicle_type == 'car' %}
+                                        <i class="fas fa-car"></i>
+                                    {% elif courier.vehicle_type == 'van' %}
+                                        <i class="fas fa-truck"></i>
+                                    {% endif %}
+                                    {{ courier.get_vehicle_type_display }}
+                                </span>
+                            </div>
+                            <div class="location-info">
+                                {% if courier.current_latitude and courier.current_longitude %}
+                                    <i class="fas fa-map-pin"></i> 
+                                    {{ courier.current_latitude|floatformat:6 }}, {{ courier.current_longitude|floatformat:6 }}
+                                {% else %}
+                                    <i class="fas fa-question-circle"></i> Місцезнаходження невідоме
+                                {% endif %}
+                            </div>
+                            <div class="last-update">
+                                {% if courier.last_location_update %}
+                                    <i class="fas fa-clock"></i> {{ courier.last_location_update|timesince }} тому
+                                {% else %}
+                                    <i class="fas fa-exclamation-triangle"></i> Ніколи не оновлювалось
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center text-muted py-4">
+                    <i class="fas fa-user-slash fa-2x mb-2"></i>
+                    <p>Немає активних кур'єрів з GPS даними</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Map -->
+        <div class="col-md-8">
+            <div id="trackingMap" style="position: relative;">
+                <div class="legend">
+                    <strong>Легенда</strong>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #27ae60;"></div>
+                        Свіже місцезнаходження (< 5 хв)
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #e74c3c;"></div>
+                        Застаріле місцезнаходження (> 5 хв)
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #3498db;"></div>
+                        Обраний кур'єр
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+let map;
+let courierMarkers = {};
+let trackingData = {{ tracking_data|safe }};
+let selectedCourierId = null;
+let autoRefreshInterval;
+
+// Initialize map
+function initMap() {
+    // Default to Kyiv coordinates
+    map = L.map('trackingMap').setView([50.4501, 30.5234], 11);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Add couriers to map
+    updateCourierMarkers();
+}
+
+// Update courier markers on map
+function updateCourierMarkers() {
+    // Clear existing markers
+    Object.values(courierMarkers).forEach(marker => {
+        map.removeLayer(marker);
+    });
+    courierMarkers = {};
+
+    // Add new markers
+    trackingData.forEach(data => {
+        const courier = data.courier;
+        
+        if (courier.current_latitude && courier.current_longitude) {
+            const lat = courier.current_latitude;
+            const lng = courier.current_longitude;
+            
+            // Determine marker color based on status
+            let markerColor = courier.is_location_fresh ? '#27ae60' : '#e74c3c';
+            if (selectedCourierId === courier.id) {
+                markerColor = '#3498db';
+            }
+            
+            // Create custom icon
+            const icon = L.divIcon({
+                html: `<div style="background-color: ${markerColor}; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
+                iconSize: [20, 20],
+                iconAnchor: [10, 10],
+                className: 'courier-marker'
+            });
+            
+            // Create marker
+            const marker = L.marker([lat, lng], { icon: icon }).addTo(map);
+            
+            // Create popup content
+            let popupContent = `
+                <div class="courier-popup">
+                    <strong>${courier.name}</strong><br>
+                    <i class="fas fa-${getVehicleIcon(courier.vehicle_type)}"></i> ${courier.vehicle_type}<br>
+                    <i class="fas fa-phone"></i> ${courier.phone}<br>
+                    <i class="fas fa-clock"></i> ${courier.last_update || 'Never'}
+                </div>
+            `;
+            
+            // Add recent path if available
+            if (data.recent_locations && data.recent_locations.length > 1) {
+                const pathCoords = data.recent_locations.map(loc => [loc.latitude, loc.longitude]);
+                L.polyline(pathCoords, {
+                    color: markerColor,
+                    weight: 3,
+                    opacity: 0.7,
+                    dashArray: '5, 10'
+                }).addTo(map);
+                
+                popupContent += `<br><small>Showing last ${data.recent_locations.length} locations</small>`;
+            }
+            
+            marker.bindPopup(popupContent);
+            courierMarkers[courier.id] = marker;
+            
+            // Add click event to select courier
+            marker.on('click', function() {
+                selectCourier(courier.id);
+            });
+        }
+    });
+}
+
+// Get vehicle icon class
+function getVehicleIcon(vehicleType) {
+    const icons = {
+        'bike': 'bicycle',
+        'motorcycle': 'motorcycle',
+        'car': 'car',
+        'van': 'truck'
+    };
+    return icons[vehicleType] || 'question';
+}
+
+// Select a courier
+function selectCourier(courierId) {
+    selectedCourierId = courierId;
+    
+    // Update UI
+    document.querySelectorAll('.courier-item').forEach(item => {
+        item.classList.remove('selected');
+    });
+    
+    const selectedItem = document.querySelector(`[data-courier-id="${courierId}"]`);
+    if (selectedItem) {
+        selectedItem.classList.add('selected');
+        selectedItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    
+    // Update map
+    updateCourierMarkers();
+    
+    // Center map on selected courier
+    const courierData = trackingData.find(data => data.courier.id === courierId);
+    if (courierData && courierData.courier.current_latitude && courierData.courier.current_longitude) {
+        map.setView([courierData.courier.current_latitude, courierData.courier.current_longitude], 15);
+    }
+}
+
+// Refresh tracking data
+function refreshData() {
+    fetch(window.location.href)
+        .then(response => response.text())
+        .then(html => {
+            // Parse response to extract tracking data
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const script = doc.querySelector('script');
+            if (script) {
+                // Extract tracking data from script
+                const dataMatch = script.textContent.match(/trackingData = (.+?);/);
+                if (dataMatch) {
+                    trackingData = JSON.parse(dataMatch[1]);
+                    updateCourierMarkers();
+                    updateLastUpdatedTime();
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error refreshing data:', error);
+        });
+}
+
+// Update last updated time
+function updateLastUpdatedTime() {
+    document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString();
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    initMap();
+    
+    // Courier item clicks
+    document.querySelectorAll('.courier-item').forEach(item => {
+        item.addEventListener('click', function() {
+            const courierId = parseInt(this.dataset.courierId);
+            selectCourier(courierId);
+        });
+    });
+    
+    // Refresh button
+    document.getElementById('refreshBtn').addEventListener('click', refreshData);
+    
+    // Auto-refresh toggle
+    const autoRefreshCheckbox = document.getElementById('autoRefresh');
+    function toggleAutoRefresh() {
+        if (autoRefreshCheckbox.checked) {
+            autoRefreshInterval = setInterval(refreshData, 30000);
+        } else {
+            clearInterval(autoRefreshInterval);
+        }
+    }
+    
+    autoRefreshCheckbox.addEventListener('change', toggleAutoRefresh);
+    toggleAutoRefresh(); // Start auto-refresh if checked
+});
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', function() {
+    if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+    }
+});
+</script>
+{% endblock %}
